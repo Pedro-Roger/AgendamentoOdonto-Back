@@ -1,0 +1,1 @@
+{"version":3,"file":"s3.service.js","sourceRoot":"","sources":["../../../src/shared/s3.service.ts"],"names":[],"mappings":";;;;;;;;;AAAA,2CAA4C;AAGrC,IAAM,SAAS,GAAf,MAAM,SAAS;IACpB,KAAK,CAAC,UAAU,CAAC,QAAgB,EAAE,QAAgB;QACjD,OAAO,oBAAoB,QAAQ,EAAE,CAAC;IACxC,CAAC;CACF,CAAA;AAJY,8BAAS;oBAAT,SAAS;IADrB,IAAA,mBAAU,GAAE;GACA,SAAS,CAIrB"}
