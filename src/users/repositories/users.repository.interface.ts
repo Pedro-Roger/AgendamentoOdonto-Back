@@ -7,7 +7,9 @@ export type SafeUser = Omit<User, 'password'>;
 
 export interface IUsersRepository {
   findByEmail(email: string): Promise<User | null>;
+  findById(id: string): Promise<User | null>;
   countAll(): Promise<number>;
   create(data: { name: string; email: string; password: string; role: UserRole }): Promise<User>;
+  update(id: string, data: { name?: string; email?: string; password?: string; role?: UserRole; isActive?: boolean }): Promise<SafeUser>;
   listSafe(): Promise<SafeUser[]>;
 }

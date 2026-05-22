@@ -24,6 +24,10 @@ export class AuthService {
     const passwordOk = compareSync(password, user.password);
     if (!passwordOk) return null;
 
+    if ((user as { isActive?: boolean }).isActive === false) {
+      throw new BadRequestException('Conta desativada. Contate o administrador.');
+    }
+
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
       email: user.email,

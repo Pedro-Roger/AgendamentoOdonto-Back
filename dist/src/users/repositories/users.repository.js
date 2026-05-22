@@ -12,6 +12,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersRepository = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const SAFE_SELECT = {
+    id: true,
+    name: true,
+    email: true,
+    role: true,
+    isActive: true,
+    createdAt: true,
+    updatedAt: true,
+};
 let UsersRepository = class UsersRepository {
     constructor(prisma) {
         this.prisma = prisma;
@@ -19,16 +28,26 @@ let UsersRepository = class UsersRepository {
     findByEmail(email) {
         return this.prisma.user.findUnique({ where: { email } });
     }
+    findById(id) {
+        return this.prisma.user.findUnique({ where: { id } });
+    }
     countAll() {
         return this.prisma.user.count();
     }
     create(data) {
         return this.prisma.user.create({ data });
     }
+    update(id, data) {
+        return this.prisma.user.update({
+            where: { id },
+            data,
+            select: SAFE_SELECT,
+        });
+    }
     listSafe() {
         return this.prisma.user.findMany({
             orderBy: { createdAt: 'desc' },
-            select: { id: true, name: true, email: true, role: true, createdAt: true, updatedAt: true },
+            select: SAFE_SELECT,
         });
     }
 };

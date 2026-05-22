@@ -21,13 +21,57 @@ let UsersService = class UsersService {
     constructor(usersRepository) {
         this.usersRepository = usersRepository;
     }
-    create(data) {
+    async create(data) {
+        if (!data.name?.trim() || !data.email?.trim() || !data.password) {
+            throw new common_1.BadRequestException('Nome, email e senha são obrigatórios');
+        }
+        if (data.password.length < 6) {
+            throw new common_1.BadRequestException('Senha deve ter pelo menos 6 caracteres');
+        }
+        const existing = await this.usersRepository.findByEmail(data.email);
+        if (existing) {
+            throw new common_1.ConflictException('Email já cadastrado');
+        }
         return this.usersRepository.create({
-            name: data.name,
-            email: data.email,
+            name: data.name.trim(),
+            email: data.email.trim().toLowerCase(),
             password: (0, bcryptjs_1.hashSync)(data.password, 10),
             role: data.role ?? user_role_enum_1.UserRole.ADMIN,
         });
+    }
+    async update(id, data, currentUserId) {
+        const target = await this.usersRepository.findById(id);
+        if (!target)
+            throw new common_1.NotFoundException('Usuário não encontrado');
+        if (target.id === currentUserId && data.isActive === false) {
+            throw new common_1.BadRequestException('Não é possível desativar a própria conta');
+        }
+        if (target.id === currentUserId && data.role && data.role !== target.role) {
+            throw new common_1.BadRequestException('Não é possível alterar o próprio papel');
+        }
+        const patch = {};
+        if (typeof data.name === 'string' && data.name.trim())
+            patch.name = data.name.trim();
+        if (typeof data.email === 'string' && data.email.trim()) {
+            const email = data.email.trim().toLowerCase();
+            if (email !== target.email) {
+                const existing = await this.usersRepository.findByEmail(email);
+                if (existing)
+                    throw new common_1.ConflictException('Email já cadastrado');
+                patch.email = email;
+            }
+        }
+        if (typeof data.password === 'string' && data.password) {
+            if (data.password.length < 6) {
+                throw new common_1.BadRequestException('Senha deve ter pelo menos 6 caracteres');
+            }
+            patch.password = (0, bcryptjs_1.hashSync)(data.password, 10);
+        }
+        if (data.role)
+            patch.role = data.role;
+        if (typeof data.isActive === 'boolean')
+            patch.isActive = data.isActive;
+        return this.usersRepository.update(id, patch);
     }
     list() {
         return this.usersRepository.listSafe();
