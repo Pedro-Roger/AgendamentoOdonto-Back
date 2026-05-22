@@ -15,9 +15,13 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('Missing bearer token');
     }
 
+    const secret = process.env.JWT_SECRET;
+    if (!secret || secret.length < 32) {
+      throw new UnauthorizedException('Server JWT misconfigured');
+    }
     const token = auth.slice(7);
     try {
-      const payload = verify(token, process.env.JWT_SECRET ?? '');
+      const payload = verify(token, secret);
       request.user = payload;
       return true;
     } catch {

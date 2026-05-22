@@ -8,28 +8,51 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PatientAppointmentsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const schedules_repository_interface_1 = require("../clinic-config/repositories/schedules.repository.interface");
+const services_repository_interface_1 = require("../clinic-config/repositories/services.repository.interface");
+const form_settings_repository_interface_1 = require("../clinic-config/repositories/form-settings.repository.interface");
+const appointments_repository_interface_1 = require("../appointments/repositories/appointments.repository.interface");
 let PatientAppointmentsService = class PatientAppointmentsService {
-    constructor(prisma) {
+    constructor(prisma, schedulesRepository, servicesRepository, formSettingsRepository, appointmentsRepository) {
         this.prisma = prisma;
+        this.schedulesRepository = schedulesRepository;
+        this.servicesRepository = servicesRepository;
+        this.formSettingsRepository = formSettingsRepository;
+        this.appointmentsRepository = appointmentsRepository;
+    }
+    listActiveServices() {
+        return this.servicesRepository.findActive();
+    }
+    getFormSettings() {
+        return this.formSettingsRepository.findLatest();
     }
     async getAvailableSchedules(serviceId, date) {
-        const targetDate = new Date(`${date}T00:00:00`);
-        const weekDay = targetDate.getDay();
-        const schedules = await this.prisma.schedule.findMany({ where: { weekDay } });
-        const appointments = await this.prisma.appointment.findMany({ where: { serviceId, date } });
-        const bookedTimes = new Set(appointments.map((appointment) => appointment.time));
-        return schedules.filter((schedule) => !bookedTimes.has(schedule.startTime));
+        const weekDay = new Date(`${date}T00:00:00`).getDay();
+        const [schedules, appointments] = await Promise.all([
+            this.schedulesRepository.findByWeekDay(weekDay),
+            this.appointmentsRepository.findByServiceAndDate(serviceId, date),
+        ]);
+        const bookedTimes = new Set(appointments.map((a) => a.time));
+        return schedules.filter((s) => !bookedTimes.has(s.startTime));
     }
     async createAppointment(payload) {
         return this.prisma.$transaction(async (tx) => {
-            const existingPatient = await tx.patient.findUnique({ where: { cpf: payload.cpf } });
-            const patient = existingPatient ??
+            const existing = await tx.patient.findUnique({ where: { cpf: payload.cpf } });
+            const patient = existing ??
                 (await tx.patient.create({
-                    data: { name: payload.name, cpf: payload.cpf, email: payload.email, phone: payload.phone },
+                    data: {
+                        name: payload.name,
+                        cpf: payload.cpf,
+                        email: payload.email,
+                        phone: payload.phone,
+                    },
                 }));
             return tx.appointment.create({
                 data: {
@@ -46,6 +69,10 @@ let PatientAppointmentsService = class PatientAppointmentsService {
 exports.PatientAppointmentsService = PatientAppointmentsService;
 exports.PatientAppointmentsService = PatientAppointmentsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __param(1, (0, common_1.Inject)(schedules_repository_interface_1.SCHEDULES_REPOSITORY)),
+    __param(2, (0, common_1.Inject)(services_repository_interface_1.SERVICES_REPOSITORY)),
+    __param(3, (0, common_1.Inject)(form_settings_repository_interface_1.FORM_SETTINGS_REPOSITORY)),
+    __param(4, (0, common_1.Inject)(appointments_repository_interface_1.APPOINTMENTS_REPOSITORY)),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, Object, Object, Object, Object])
 ], PatientAppointmentsService);
 //# sourceMappingURL=patient-appointments.service.js.map

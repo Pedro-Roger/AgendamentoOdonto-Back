@@ -1,0 +1,5 @@
+export enum TimelineEventType {
+  APPOINTMENT = 'APPOINTMENT',
+  MEDICAL_RECORD = 'MEDICAL_RECORD',
+  SIGNATURE = 'SIGNATURE',
+}

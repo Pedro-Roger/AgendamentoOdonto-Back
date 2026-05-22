@@ -18,4 +18,14 @@ export class PatientAppointmentsController {
   ) {
     return this.patientAppointmentsService.createAppointment(body);
   }
+
+  @Get('services')
+  listServices() {
+    return this.patientAppointmentsService.listActiveServices();
+  }
+
+  @Get('form-settings')
+  getFormSettings() {
+    return this.patientAppointmentsService.getFormSettings();
+  }
 }

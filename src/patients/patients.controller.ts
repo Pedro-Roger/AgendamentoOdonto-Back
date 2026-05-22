@@ -1,10 +1,13 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
+import { Roles } from '../common/auth/roles.decorator';
+import { RolesGuard } from '../common/auth/roles.guard';
 import { SearchPatientsQueryDto } from './dto/search-patients-query.dto';
 import { PatientsService } from './patients.service';
 
 @Controller('api/patients')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('MASTER', 'ADMIN')
 export class PatientsController {
   constructor(private readonly patientsService: PatientsService) {}
 

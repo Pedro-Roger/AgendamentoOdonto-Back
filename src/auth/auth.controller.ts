@@ -1,6 +1,7 @@
-﻿import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Post, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { BootstrapMasterDto } from './dto/bootstrap-master.dto';
 
 @Controller('api/auth')
 export class AuthController {
@@ -12,12 +13,22 @@ export class AuthController {
     if (!token) {
       throw new UnauthorizedException('Invalid credentials');
     }
-
     return token;
   }
 
   @Post('bootstrap-master')
-  async bootstrapMaster(@Body() body: { name: string; email: string; password: string }) {
-    return this.authService.bootstrapMaster(body);
+  async bootstrapMaster(@Body() body: BootstrapMasterDto) {
+    const expected = process.env.BOOTSTRAP_TOKEN;
+    if (!expected || expected.length < 16) {
+      throw new ForbiddenException('Bootstrap desabilitado');
+    }
+    if (body.bootstrapToken !== expected) {
+      throw new ForbiddenException('Token de bootstrap inválido');
+    }
+    return this.authService.bootstrapMaster({
+      name: body.name,
+      email: body.email,
+      password: body.password,
+    });
   }
 }

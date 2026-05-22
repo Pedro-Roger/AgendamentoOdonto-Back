@@ -1,36 +1,58 @@
-import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateFormSettingsDto } from './dto/create-form-settings.dto';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import { FormFieldDto } from './dto/create-form-settings.dto';
+import {
+  IServicesRepository,
+  SERVICES_REPOSITORY,
+} from './repositories/services.repository.interface';
+import {
+  ISchedulesRepository,
+  SCHEDULES_REPOSITORY,
+} from './repositories/schedules.repository.interface';
+import {
+  FORM_SETTINGS_REPOSITORY,
+  IFormSettingsRepository,
+} from './repositories/form-settings.repository.interface';
 
 @Injectable()
 export class ClinicConfigService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(SERVICES_REPOSITORY) private readonly servicesRepository: IServicesRepository,
+    @Inject(SCHEDULES_REPOSITORY) private readonly schedulesRepository: ISchedulesRepository,
+    @Inject(FORM_SETTINGS_REPOSITORY) private readonly formSettingsRepository: IFormSettingsRepository,
+  ) {}
 
   createService(data: CreateServiceDto) {
-    return this.prisma.service.create({ data });
+    return this.servicesRepository.create(data);
   }
 
   listActiveServices() {
-    return this.prisma.service.findMany({ where: { isActive: true } });
+    return this.servicesRepository.findActive();
   }
 
   updateService(id: string, data: UpdateServiceDto) {
-    return this.prisma.service.update({ where: { id }, data });
+    return this.servicesRepository.update(id, data);
   }
 
   createSchedule(data: CreateScheduleDto) {
-    return this.prisma.schedule.create({ data });
+    return this.schedulesRepository.create(data);
   }
 
   listSchedules() {
-    return this.prisma.schedule.findMany({ orderBy: { weekDay: 'asc' } });
+    return this.schedulesRepository.findAll();
   }
 
-  createFormSettings(fields: CreateFormSettingsDto['fields']) {
-    return this.prisma.formSetting.create({ data: { fields: fields as unknown as Prisma.InputJsonValue } });
+  replaceSchedules(schedules: CreateScheduleDto[]) {
+    return this.schedulesRepository.replaceAll(schedules);
+  }
+
+  createFormSettings(fields: FormFieldDto[]) {
+    return this.formSettingsRepository.create(fields);
+  }
+
+  getFormSettings() {
+    return this.formSettingsRepository.findLatest();
   }
 }

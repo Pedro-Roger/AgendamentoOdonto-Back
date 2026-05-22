@@ -1,29 +1,66 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  IPatientsRepository,
+  PATIENTS_REPOSITORY,
+} from './repositories/patients.repository.interface';
+import {
+  APPOINTMENTS_REPOSITORY,
+  IAppointmentsRepository,
+} from '../appointments/repositories/appointments.repository.interface';
+import {
+  IMedicalRecordsRepository,
+  MEDICAL_RECORDS_REPOSITORY,
+} from '../medical-records/repositories/medical-records.repository.interface';
+import { TimelineEventType } from '../common/enums/timeline-event-type.enum';
+
+export type TimelineEvent = {
+  id: string;
+  type: TimelineEventType;
+  title: string;
+  date: string;
+  status?: string;
+};
 
 @Injectable()
 export class PatientsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(PATIENTS_REPOSITORY) private readonly patientsRepository: IPatientsRepository,
+    @Inject(APPOINTMENTS_REPOSITORY) private readonly appointmentsRepository: IAppointmentsRepository,
+    @Inject(MEDICAL_RECORDS_REPOSITORY) private readonly medicalRecordsRepository: IMedicalRecordsRepository,
+  ) {}
 
   list(q?: string) {
-    if (!q) {
-      return this.prisma.patient.findMany();
-    }
-
-    return this.prisma.patient.findMany({
-      where: {
-        OR: [{ name: { contains: q } }, { cpf: { contains: q } }],
-      },
-    });
+    return this.patientsRepository.findAll(q);
   }
 
-  profile(id: string) {
-    return this.prisma.patient.findUnique({ where: { id } });
+  async profile(id: string) {
+    const patient = await this.patientsRepository.findById(id);
+    if (!patient) throw new NotFoundException('Paciente não encontrado');
+    return patient;
   }
 
-  async timeline(id: string) {
-    const appointments = await this.prisma.appointment.findMany({ where: { patientId: id } });
-    const medicalRecords = await this.prisma.medicalRecord.findMany({ where: { appointment: { patientId: id } } });
-    return { appointments, medicalRecords };
+  async timeline(id: string): Promise<TimelineEvent[]> {
+    const [appointments, medicalRecords] = await Promise.all([
+      this.appointmentsRepository.findByPatient(id),
+      this.medicalRecordsRepository.findByPatient(id),
+    ]);
+
+    const appointmentEvents: TimelineEvent[] = appointments.map((a) => ({
+      id: a.id,
+      type: TimelineEventType.APPOINTMENT,
+      title: `Consulta ${a.time ?? ''}`,
+      date: a.date ?? '',
+    }));
+
+    const recordEvents: TimelineEvent[] = medicalRecords.map((r) => ({
+      id: r.id,
+      type: TimelineEventType.MEDICAL_RECORD,
+      title: `Prontuário v${r.version}`,
+      date: r.createdAt ? new Date(r.createdAt).toISOString().slice(0, 10) : '',
+    }));
+
+    return [...appointmentEvents, ...recordEvents].sort((a, b) =>
+      (b.date ?? '').localeCompare(a.date ?? ''),
+    );
   }
 }

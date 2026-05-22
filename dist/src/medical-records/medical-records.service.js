@@ -8,44 +8,56 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MedicalRecordsService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma/prisma.service");
+const medical_records_repository_interface_1 = require("./repositories/medical-records.repository.interface");
 const s3_service_1 = require("../shared/s3.service");
 const attachment_category_enum_1 = require("../common/enums/attachment-category.enum");
 let MedicalRecordsService = class MedicalRecordsService {
-    constructor(prisma, s3Service) {
-        this.prisma = prisma;
+    constructor(medicalRecordsRepository, s3Service) {
+        this.medicalRecordsRepository = medicalRecordsRepository;
         this.s3Service = s3Service;
     }
     create(appointmentId, content) {
-        return this.prisma.medicalRecord.create({ data: { appointmentId, content: content, version: 1 } });
-    }
-    async duplicate(id) {
-        const current = await this.prisma.medicalRecord.findUnique({ where: { id } });
-        return this.prisma.medicalRecord.create({
-            data: {
-                appointmentId: current.appointmentId,
-                content: current.content,
-                version: current.version + 1,
-            },
+        return this.medicalRecordsRepository.create({
+            appointmentId,
+            content: content,
+            version: 1,
         });
     }
-    findOne(id) {
-        return this.prisma.medicalRecord.findUnique({ where: { id } });
+    async duplicate(id) {
+        const current = await this.medicalRecordsRepository.findById(id);
+        if (!current)
+            throw new common_1.NotFoundException('Prontuário não encontrado');
+        return this.medicalRecordsRepository.create({
+            appointmentId: current.appointmentId,
+            content: current.content,
+            version: current.version + 1,
+        });
+    }
+    async findOne(id) {
+        const record = await this.medicalRecordsRepository.findById(id);
+        if (!record)
+            throw new common_1.NotFoundException('Prontuário não encontrado');
+        return record;
     }
     async attach(id, file) {
         const fileUrl = await this.s3Service.uploadFile(file.originalname, file.buffer);
-        return this.prisma.medicalRecordAttachment.create({
-            data: { medicalRecordId: id, fileUrl, category: attachment_category_enum_1.AttachmentCategory.MEDICAL_ATTACHMENT },
+        return this.medicalRecordsRepository.createAttachment({
+            medicalRecordId: id,
+            fileUrl,
+            category: attachment_category_enum_1.AttachmentCategory.MEDICAL_ATTACHMENT,
         });
     }
 };
 exports.MedicalRecordsService = MedicalRecordsService;
 exports.MedicalRecordsService = MedicalRecordsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        s3_service_1.S3Service])
+    __param(0, (0, common_1.Inject)(medical_records_repository_interface_1.MEDICAL_RECORDS_REPOSITORY)),
+    __metadata("design:paramtypes", [Object, s3_service_1.S3Service])
 ], MedicalRecordsService);
 //# sourceMappingURL=medical-records.service.js.map

@@ -1,30 +1,64 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import {
+  ISchedulesRepository,
+  SCHEDULES_REPOSITORY,
+} from '../clinic-config/repositories/schedules.repository.interface';
+import {
+  IServicesRepository,
+  SERVICES_REPOSITORY,
+} from '../clinic-config/repositories/services.repository.interface';
+import {
+  FORM_SETTINGS_REPOSITORY,
+  IFormSettingsRepository,
+} from '../clinic-config/repositories/form-settings.repository.interface';
+import {
+  APPOINTMENTS_REPOSITORY,
+  IAppointmentsRepository,
+} from '../appointments/repositories/appointments.repository.interface';
 
 @Injectable()
 export class PatientAppointmentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(SCHEDULES_REPOSITORY) private readonly schedulesRepository: ISchedulesRepository,
+    @Inject(SERVICES_REPOSITORY) private readonly servicesRepository: IServicesRepository,
+    @Inject(FORM_SETTINGS_REPOSITORY) private readonly formSettingsRepository: IFormSettingsRepository,
+    @Inject(APPOINTMENTS_REPOSITORY) private readonly appointmentsRepository: IAppointmentsRepository,
+  ) {}
+
+  listActiveServices() {
+    return this.servicesRepository.findActive();
+  }
+
+  getFormSettings() {
+    return this.formSettingsRepository.findLatest();
+  }
 
   async getAvailableSchedules(serviceId: string, date: string) {
-    const targetDate = new Date(`${date}T00:00:00`);
-    const weekDay = targetDate.getDay();
-
-    const schedules = await this.prisma.schedule.findMany({ where: { weekDay } });
-    const appointments = await this.prisma.appointment.findMany({ where: { serviceId, date } });
-    const bookedTimes = new Set(appointments.map((appointment) => appointment.time));
-
-    return schedules.filter((schedule) => !bookedTimes.has(schedule.startTime));
+    const weekDay = new Date(`${date}T00:00:00`).getDay();
+    const [schedules, appointments] = await Promise.all([
+      this.schedulesRepository.findByWeekDay(weekDay),
+      this.appointmentsRepository.findByServiceAndDate(serviceId, date),
+    ]);
+    const bookedTimes = new Set(appointments.map((a) => a.time));
+    return schedules.filter((s) => !bookedTimes.has(s.startTime));
   }
 
   async createAppointment(payload: CreateAppointmentDto) {
     return this.prisma.$transaction(async (tx) => {
-      const existingPatient = await tx.patient.findUnique({ where: { cpf: payload.cpf } });
+      const existing = await tx.patient.findUnique({ where: { cpf: payload.cpf } });
       const patient =
-        existingPatient ??
+        existing ??
         (await tx.patient.create({
-          data: { name: payload.name, cpf: payload.cpf, email: payload.email, phone: payload.phone },
+          data: {
+            name: payload.name,
+            cpf: payload.cpf,
+            email: payload.email,
+            phone: payload.phone,
+          },
         }));
 
       return tx.appointment.create({

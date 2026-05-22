@@ -40,4 +40,14 @@ export class ClinicConfigController {
   createFormSettings(@Body() body: CreateFormSettingsDto) {
     return this.clinicConfigService.createFormSettings(body.fields);
   }
+
+  @Get('form-settings')
+  getFormSettings() {
+    return this.clinicConfigService.getFormSettings();
+  }
+
+  @Put('schedules')
+  replaceSchedules(@Body() body: CreateScheduleDto[]) {
+    return this.clinicConfigService.replaceSchedules(body);
+  }
 }

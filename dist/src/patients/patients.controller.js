@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PatientsController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../common/auth/jwt-auth.guard");
+const roles_decorator_1 = require("../common/auth/roles.decorator");
+const roles_guard_1 = require("../common/auth/roles.guard");
 const search_patients_query_dto_1 = require("./dto/search-patients-query.dto");
 const patients_service_1 = require("./patients.service");
 let PatientsController = class PatientsController {
@@ -55,7 +57,8 @@ __decorate([
 ], PatientsController.prototype, "timeline", null);
 exports.PatientsController = PatientsController = __decorate([
     (0, common_1.Controller)('api/patients'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
     __metadata("design:paramtypes", [patients_service_1.PatientsService])
 ], PatientsController);
 //# sourceMappingURL=patients.controller.js.map

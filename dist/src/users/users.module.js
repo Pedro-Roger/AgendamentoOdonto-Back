@@ -11,13 +11,20 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const users_controller_1 = require("./users.controller");
 const users_service_1 = require("./users.service");
+const users_repository_1 = require("./repositories/users.repository");
+const users_repository_interface_1 = require("./repositories/users.repository.interface");
 let UsersModule = class UsersModule {
 };
 exports.UsersModule = UsersModule;
 exports.UsersModule = UsersModule = __decorate([
     (0, common_1.Module)({
         controllers: [users_controller_1.UsersController],
-        providers: [users_service_1.UsersService, prisma_service_1.PrismaService],
+        providers: [
+            users_service_1.UsersService,
+            prisma_service_1.PrismaService,
+            { provide: users_repository_interface_1.USERS_REPOSITORY, useClass: users_repository_1.UsersRepository },
+        ],
+        exports: [users_repository_interface_1.USERS_REPOSITORY],
     })
 ], UsersModule);
 //# sourceMappingURL=users.module.js.map

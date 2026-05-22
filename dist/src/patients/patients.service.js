@@ -8,36 +8,57 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PatientsService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma/prisma.service");
+const patients_repository_interface_1 = require("./repositories/patients.repository.interface");
+const appointments_repository_interface_1 = require("../appointments/repositories/appointments.repository.interface");
+const medical_records_repository_interface_1 = require("../medical-records/repositories/medical-records.repository.interface");
+const timeline_event_type_enum_1 = require("../common/enums/timeline-event-type.enum");
 let PatientsService = class PatientsService {
-    constructor(prisma) {
-        this.prisma = prisma;
+    constructor(patientsRepository, appointmentsRepository, medicalRecordsRepository) {
+        this.patientsRepository = patientsRepository;
+        this.appointmentsRepository = appointmentsRepository;
+        this.medicalRecordsRepository = medicalRecordsRepository;
     }
     list(q) {
-        if (!q) {
-            return this.prisma.patient.findMany();
-        }
-        return this.prisma.patient.findMany({
-            where: {
-                OR: [{ name: { contains: q } }, { cpf: { contains: q } }],
-            },
-        });
+        return this.patientsRepository.findAll(q);
     }
-    profile(id) {
-        return this.prisma.patient.findUnique({ where: { id } });
+    async profile(id) {
+        const patient = await this.patientsRepository.findById(id);
+        if (!patient)
+            throw new common_1.NotFoundException('Paciente não encontrado');
+        return patient;
     }
     async timeline(id) {
-        const appointments = await this.prisma.appointment.findMany({ where: { patientId: id } });
-        const medicalRecords = await this.prisma.medicalRecord.findMany({ where: { appointment: { patientId: id } } });
-        return { appointments, medicalRecords };
+        const [appointments, medicalRecords] = await Promise.all([
+            this.appointmentsRepository.findByPatient(id),
+            this.medicalRecordsRepository.findByPatient(id),
+        ]);
+        const appointmentEvents = appointments.map((a) => ({
+            id: a.id,
+            type: timeline_event_type_enum_1.TimelineEventType.APPOINTMENT,
+            title: `Consulta ${a.time ?? ''}`,
+            date: a.date ?? '',
+        }));
+        const recordEvents = medicalRecords.map((r) => ({
+            id: r.id,
+            type: timeline_event_type_enum_1.TimelineEventType.MEDICAL_RECORD,
+            title: `Prontuário v${r.version}`,
+            date: r.createdAt ? new Date(r.createdAt).toISOString().slice(0, 10) : '',
+        }));
+        return [...appointmentEvents, ...recordEvents].sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''));
     }
 };
 exports.PatientsService = PatientsService;
 exports.PatientsService = PatientsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __param(0, (0, common_1.Inject)(patients_repository_interface_1.PATIENTS_REPOSITORY)),
+    __param(1, (0, common_1.Inject)(appointments_repository_interface_1.APPOINTMENTS_REPOSITORY)),
+    __param(2, (0, common_1.Inject)(medical_records_repository_interface_1.MEDICAL_RECORDS_REPOSITORY)),
+    __metadata("design:paramtypes", [Object, Object, Object])
 ], PatientsService);
 //# sourceMappingURL=patients.service.js.map

@@ -12,9 +12,15 @@ describe('Feature 04 - Assinatura', () => {
     let app;
     const prismaMock = {
         signatureToken: {
-            create: jest.fn(() => ({ token: 'token_1', medicalRecordId: 'mr_1' })),
-            findUnique: jest.fn(() => ({ token: 'token_1', medicalRecordId: 'mr_1' })),
+            create: jest.fn(() => ({ token: 'token_1', medicalRecordId: 'mr_1', createdAt: new Date() })),
+            findUnique: jest.fn(() => ({
+                token: 'token_1',
+                medicalRecordId: 'mr_1',
+                usedAt: null,
+                createdAt: new Date(),
+            })),
             update: jest.fn(() => ({ token: 'token_1' })),
+            updateMany: jest.fn(() => ({ count: 1 })),
         },
         medicalRecordAttachment: { create: jest.fn(() => ({ id: 'att_1' })) },
     };

@@ -12,13 +12,21 @@ const medical_records_controller_1 = require("./medical-records.controller");
 const medical_records_service_1 = require("./medical-records.service");
 const prisma_service_1 = require("../prisma/prisma.service");
 const s3_service_1 = require("../shared/s3.service");
+const medical_records_repository_1 = require("./repositories/medical-records.repository");
+const medical_records_repository_interface_1 = require("./repositories/medical-records.repository.interface");
 let MedicalRecordsModule = class MedicalRecordsModule {
 };
 exports.MedicalRecordsModule = MedicalRecordsModule;
 exports.MedicalRecordsModule = MedicalRecordsModule = __decorate([
     (0, common_1.Module)({
         controllers: [medical_records_controller_1.MedicalRecordsController],
-        providers: [medical_records_service_1.MedicalRecordsService, prisma_service_1.PrismaService, s3_service_1.S3Service],
+        providers: [
+            medical_records_service_1.MedicalRecordsService,
+            prisma_service_1.PrismaService,
+            s3_service_1.S3Service,
+            { provide: medical_records_repository_interface_1.MEDICAL_RECORDS_REPOSITORY, useClass: medical_records_repository_1.MedicalRecordsRepository },
+        ],
+        exports: [medical_records_repository_interface_1.MEDICAL_RECORDS_REPOSITORY],
     })
 ], MedicalRecordsModule);
 //# sourceMappingURL=medical-records.module.js.map

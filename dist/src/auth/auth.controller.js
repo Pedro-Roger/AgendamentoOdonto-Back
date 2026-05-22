@@ -16,6 +16,7 @@ exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const login_dto_1 = require("./dto/login.dto");
+const bootstrap_master_dto_1 = require("./dto/bootstrap-master.dto");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
@@ -28,7 +29,18 @@ let AuthController = class AuthController {
         return token;
     }
     async bootstrapMaster(body) {
-        return this.authService.bootstrapMaster(body);
+        const expected = process.env.BOOTSTRAP_TOKEN;
+        if (!expected || expected.length < 16) {
+            throw new common_1.ForbiddenException('Bootstrap desabilitado');
+        }
+        if (body.bootstrapToken !== expected) {
+            throw new common_1.ForbiddenException('Token de bootstrap inválido');
+        }
+        return this.authService.bootstrapMaster({
+            name: body.name,
+            email: body.email,
+            password: body.password,
+        });
     }
 };
 exports.AuthController = AuthController;
@@ -43,7 +55,7 @@ __decorate([
     (0, common_1.Post)('bootstrap-master'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [bootstrap_master_dto_1.BootstrapMasterDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "bootstrapMaster", null);
 exports.AuthController = AuthController = __decorate([

@@ -1,6 +1,8 @@
 import { Body, Controller, Ip, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from './common/auth/jwt-auth.guard';
+import { Roles } from './common/auth/roles.decorator';
+import { RolesGuard } from './common/auth/roles.guard';
 import { GenerateElectronicLinkDto } from './signatures/dto/generate-electronic-link.dto';
 import { SubmitElectronicSignatureDto } from './signatures/dto/submit-electronic-signature.dto';
 import { UploadPhysicalSignatureDto } from './signatures/dto/upload-physical-signature.dto';
@@ -11,14 +13,16 @@ export class SignaturesController {
   constructor(private readonly signaturesService: SignaturesService) {}
 
   @Post('signatures/physical')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('MASTER', 'ADMIN')
   @UseInterceptors(FileInterceptor('file'))
   uploadPhysical(@UploadedFile() file: Express.Multer.File, @Body() body: UploadPhysicalSignatureDto) {
     return this.signaturesService.uploadPhysical(body.medicalRecordId, file);
   }
 
   @Post('signatures/electronic/generate-link')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('MASTER', 'ADMIN')
   generateElectronicLink(@Body() body: GenerateElectronicLinkDto) {
     return this.signaturesService.generateElectronicLink(body.medicalRecordId);
   }

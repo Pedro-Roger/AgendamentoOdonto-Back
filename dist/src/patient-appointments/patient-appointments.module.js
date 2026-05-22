@@ -11,13 +11,28 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const patient_appointments_controller_1 = require("./patient-appointments.controller");
 const patient_appointments_service_1 = require("./patient-appointments.service");
+const schedules_repository_1 = require("../clinic-config/repositories/schedules.repository");
+const schedules_repository_interface_1 = require("../clinic-config/repositories/schedules.repository.interface");
+const services_repository_1 = require("../clinic-config/repositories/services.repository");
+const services_repository_interface_1 = require("../clinic-config/repositories/services.repository.interface");
+const form_settings_repository_1 = require("../clinic-config/repositories/form-settings.repository");
+const form_settings_repository_interface_1 = require("../clinic-config/repositories/form-settings.repository.interface");
+const appointments_repository_1 = require("../appointments/repositories/appointments.repository");
+const appointments_repository_interface_1 = require("../appointments/repositories/appointments.repository.interface");
 let PatientAppointmentsModule = class PatientAppointmentsModule {
 };
 exports.PatientAppointmentsModule = PatientAppointmentsModule;
 exports.PatientAppointmentsModule = PatientAppointmentsModule = __decorate([
     (0, common_1.Module)({
         controllers: [patient_appointments_controller_1.PatientAppointmentsController],
-        providers: [patient_appointments_service_1.PatientAppointmentsService, prisma_service_1.PrismaService],
+        providers: [
+            patient_appointments_service_1.PatientAppointmentsService,
+            prisma_service_1.PrismaService,
+            { provide: schedules_repository_interface_1.SCHEDULES_REPOSITORY, useClass: schedules_repository_1.SchedulesRepository },
+            { provide: services_repository_interface_1.SERVICES_REPOSITORY, useClass: services_repository_1.ServicesRepository },
+            { provide: form_settings_repository_interface_1.FORM_SETTINGS_REPOSITORY, useClass: form_settings_repository_1.FormSettingsRepository },
+            { provide: appointments_repository_interface_1.APPOINTMENTS_REPOSITORY, useClass: appointments_repository_1.AppointmentsRepository },
+        ],
     })
 ], PatientAppointmentsModule);
 //# sourceMappingURL=patient-appointments.module.js.map

@@ -1,11 +1,33 @@
-import { Body, Controller, Get, Param, Post, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
+import { Roles } from '../common/auth/roles.decorator';
+import { RolesGuard } from '../common/auth/roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
 import { MedicalRecordsService } from './medical-records.service';
 
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+const ALLOWED_MIME = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp',
+  'application/pdf',
+]);
+
 @Controller('api/medical-records')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('MASTER', 'ADMIN')
 export class MedicalRecordsController {
   constructor(private readonly medicalRecordsService: MedicalRecordsService) {}
 
@@ -25,8 +47,12 @@ export class MedicalRecordsController {
   }
 
   @Post(':id/attachments')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_ATTACHMENT_BYTES } }))
   attach(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('Arquivo obrigatório');
+    if (!ALLOWED_MIME.has(file.mimetype)) {
+      throw new BadRequestException('Tipo de arquivo não permitido');
+    }
     return this.medicalRecordsService.attach(id, file);
   }
 }

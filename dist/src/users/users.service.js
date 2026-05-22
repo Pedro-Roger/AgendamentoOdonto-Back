@@ -8,28 +8,35 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const bcryptjs_1 = require("bcryptjs");
-const prisma_service_1 = require("../prisma/prisma.service");
+const users_repository_interface_1 = require("./repositories/users.repository.interface");
+const user_role_enum_1 = require("../common/enums/user-role.enum");
 let UsersService = class UsersService {
-    constructor(prisma) {
-        this.prisma = prisma;
+    constructor(usersRepository) {
+        this.usersRepository = usersRepository;
     }
     create(data) {
-        return this.prisma.user.create({ data: { ...data, password: (0, bcryptjs_1.hashSync)(data.password, 10) } });
+        return this.usersRepository.create({
+            name: data.name,
+            email: data.email,
+            password: (0, bcryptjs_1.hashSync)(data.password, 10),
+            role: data.role ?? user_role_enum_1.UserRole.ADMIN,
+        });
     }
     list() {
-        return this.prisma.user.findMany({
-            orderBy: { createdAt: 'desc' },
-            select: { id: true, name: true, email: true, role: true, createdAt: true, updatedAt: true },
-        });
+        return this.usersRepository.listSafe();
     }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __param(0, (0, common_1.Inject)(users_repository_interface_1.USERS_REPOSITORY)),
+    __metadata("design:paramtypes", [Object])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

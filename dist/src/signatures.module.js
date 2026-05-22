@@ -12,13 +12,23 @@ const signatures_controller_1 = require("./signatures.controller");
 const signatures_service_1 = require("./signatures.service");
 const prisma_service_1 = require("./prisma/prisma.service");
 const s3_service_1 = require("./shared/s3.service");
+const signature_tokens_repository_1 = require("./signatures/repositories/signature-tokens.repository");
+const signature_tokens_repository_interface_1 = require("./signatures/repositories/signature-tokens.repository.interface");
+const medical_records_repository_1 = require("./medical-records/repositories/medical-records.repository");
+const medical_records_repository_interface_1 = require("./medical-records/repositories/medical-records.repository.interface");
 let SignaturesModule = class SignaturesModule {
 };
 exports.SignaturesModule = SignaturesModule;
 exports.SignaturesModule = SignaturesModule = __decorate([
     (0, common_1.Module)({
         controllers: [signatures_controller_1.SignaturesController],
-        providers: [signatures_service_1.SignaturesService, prisma_service_1.PrismaService, s3_service_1.S3Service],
+        providers: [
+            signatures_service_1.SignaturesService,
+            prisma_service_1.PrismaService,
+            s3_service_1.S3Service,
+            { provide: signature_tokens_repository_interface_1.SIGNATURE_TOKENS_REPOSITORY, useClass: signature_tokens_repository_1.SignatureTokensRepository },
+            { provide: medical_records_repository_interface_1.MEDICAL_RECORDS_REPOSITORY, useClass: medical_records_repository_1.MedicalRecordsRepository },
+        ],
     })
 ], SignaturesModule);
 //# sourceMappingURL=signatures.module.js.map

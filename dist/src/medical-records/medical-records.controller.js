@@ -15,9 +15,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MedicalRecordsController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../common/auth/jwt-auth.guard");
+const roles_decorator_1 = require("../common/auth/roles.decorator");
+const roles_guard_1 = require("../common/auth/roles.guard");
 const platform_express_1 = require("@nestjs/platform-express");
 const create_medical_record_dto_1 = require("./dto/create-medical-record.dto");
 const medical_records_service_1 = require("./medical-records.service");
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+const ALLOWED_MIME = new Set([
+    'image/png',
+    'image/jpeg',
+    'image/jpg',
+    'image/webp',
+    'application/pdf',
+]);
 let MedicalRecordsController = class MedicalRecordsController {
     constructor(medicalRecordsService) {
         this.medicalRecordsService = medicalRecordsService;
@@ -32,6 +42,11 @@ let MedicalRecordsController = class MedicalRecordsController {
         return this.medicalRecordsService.findOne(id);
     }
     attach(id, file) {
+        if (!file)
+            throw new common_1.BadRequestException('Arquivo obrigatório');
+        if (!ALLOWED_MIME.has(file.mimetype)) {
+            throw new common_1.BadRequestException('Tipo de arquivo não permitido');
+        }
         return this.medicalRecordsService.attach(id, file);
     }
 };
@@ -59,7 +74,7 @@ __decorate([
 ], MedicalRecordsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(':id/attachments'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', { limits: { fileSize: MAX_ATTACHMENT_BYTES } })),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
@@ -68,7 +83,8 @@ __decorate([
 ], MedicalRecordsController.prototype, "attach", null);
 exports.MedicalRecordsController = MedicalRecordsController = __decorate([
     (0, common_1.Controller)('api/medical-records'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
     __metadata("design:paramtypes", [medical_records_service_1.MedicalRecordsService])
 ], MedicalRecordsController);
 //# sourceMappingURL=medical-records.controller.js.map

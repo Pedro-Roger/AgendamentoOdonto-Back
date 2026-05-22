@@ -19,9 +19,13 @@ let JwtAuthGuard = class JwtAuthGuard {
         if (!auth || !auth.startsWith('Bearer ')) {
             throw new common_1.UnauthorizedException('Missing bearer token');
         }
+        const secret = process.env.JWT_SECRET;
+        if (!secret || secret.length < 32) {
+            throw new common_1.UnauthorizedException('Server JWT misconfigured');
+        }
         const token = auth.slice(7);
         try {
-            const payload = (0, jsonwebtoken_1.verify)(token, process.env.JWT_SECRET ?? '');
+            const payload = (0, jsonwebtoken_1.verify)(token, secret);
             request.user = payload;
             return true;
         }

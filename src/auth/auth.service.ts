@@ -1,23 +1,34 @@
-﻿import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compareSync, hashSync } from 'bcryptjs';
-import { PrismaService } from '../prisma/prisma.service';
+import {
+  IUsersRepository,
+  USERS_REPOSITORY,
+} from '../users/repositories/users.repository.interface';
+import { UserRole } from '../common/enums/user-role.enum';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(USERS_REPOSITORY) private readonly usersRepository: IUsersRepository,
     private readonly jwtService: JwtService,
   ) {}
 
   async login(email: string, password: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.usersRepository.findByEmail(email);
     if (!user) return null;
 
-    const passwordOk = user.password.startsWith('$2') ? compareSync(password, user.password) : user.password === password;
+    if (!user.password || !user.password.startsWith('$2')) {
+      return null;
+    }
+    const passwordOk = compareSync(password, user.password);
     if (!passwordOk) return null;
 
-    const accessToken = await this.jwtService.signAsync({ sub: user.id, email: user.email, role: user.role });
+    const accessToken = await this.jwtService.signAsync({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    });
 
     return {
       accessToken,
@@ -27,18 +38,16 @@ export class AuthService {
   }
 
   async bootstrapMaster(body: { name: string; email: string; password: string }) {
-    const count = await this.prisma.user.count();
+    const count = await this.usersRepository.countAll();
     if (count > 0) {
       throw new BadRequestException('Bootstrap disabled: users already exist');
     }
 
-    const user = await this.prisma.user.create({
-      data: {
-        name: body.name,
-        email: body.email,
-        password: hashSync(body.password, 10),
-        role: 'MASTER',
-      },
+    const user = await this.usersRepository.create({
+      name: body.name,
+      email: body.email,
+      password: hashSync(body.password, 10),
+      role: UserRole.MASTER,
     });
 
     return { id: user.id, email: user.email, role: user.role };

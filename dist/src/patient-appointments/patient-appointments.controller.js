@@ -26,6 +26,12 @@ let PatientAppointmentsController = class PatientAppointmentsController {
     createAppointment(body) {
         return this.patientAppointmentsService.createAppointment(body);
     }
+    listServices() {
+        return this.patientAppointmentsService.listActiveServices();
+    }
+    getFormSettings() {
+        return this.patientAppointmentsService.getFormSettings();
+    }
 };
 exports.PatientAppointmentsController = PatientAppointmentsController;
 __decorate([
@@ -43,6 +49,18 @@ __decorate([
     __metadata("design:paramtypes", [create_appointment_dto_1.CreateAppointmentDto]),
     __metadata("design:returntype", void 0)
 ], PatientAppointmentsController.prototype, "createAppointment", null);
+__decorate([
+    (0, common_1.Get)('services'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], PatientAppointmentsController.prototype, "listServices", null);
+__decorate([
+    (0, common_1.Get)('form-settings'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], PatientAppointmentsController.prototype, "getFormSettings", null);
 exports.PatientAppointmentsController = PatientAppointmentsController = __decorate([
     (0, common_1.Controller)('api/public'),
     __metadata("design:paramtypes", [patient_appointments_service_1.PatientAppointmentsService])

@@ -1,20 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { hashSync } from 'bcryptjs';
 import { CreateUserDto } from './dto/create-user.dto';
-import { PrismaService } from '../prisma/prisma.service';
+import {
+  IUsersRepository,
+  USERS_REPOSITORY,
+} from './repositories/users.repository.interface';
+import { UserRole } from '../common/enums/user-role.enum';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(USERS_REPOSITORY) private readonly usersRepository: IUsersRepository,
+  ) {}
 
   create(data: CreateUserDto) {
-    return this.prisma.user.create({ data: { ...data, password: hashSync(data.password, 10) } });
+    return this.usersRepository.create({
+      name: data.name,
+      email: data.email,
+      password: hashSync(data.password, 10),
+      role: (data.role as UserRole) ?? UserRole.ADMIN,
+    });
   }
 
   list() {
-    return this.prisma.user.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: { id: true, name: true, email: true, role: true, createdAt: true, updatedAt: true },
-    });
+    return this.usersRepository.listSafe();
   }
 }

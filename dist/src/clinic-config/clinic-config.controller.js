@@ -42,6 +42,12 @@ let ClinicConfigController = class ClinicConfigController {
     createFormSettings(body) {
         return this.clinicConfigService.createFormSettings(body.fields);
     }
+    getFormSettings() {
+        return this.clinicConfigService.getFormSettings();
+    }
+    replaceSchedules(body) {
+        return this.clinicConfigService.replaceSchedules(body);
+    }
 };
 exports.ClinicConfigController = ClinicConfigController;
 __decorate([
@@ -85,6 +91,19 @@ __decorate([
     __metadata("design:paramtypes", [create_form_settings_dto_1.CreateFormSettingsDto]),
     __metadata("design:returntype", void 0)
 ], ClinicConfigController.prototype, "createFormSettings", null);
+__decorate([
+    (0, common_1.Get)('form-settings'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ClinicConfigController.prototype, "getFormSettings", null);
+__decorate([
+    (0, common_1.Put)('schedules'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", void 0)
+], ClinicConfigController.prototype, "replaceSchedules", null);
 exports.ClinicConfigController = ClinicConfigController = __decorate([
     (0, common_1.Controller)('api'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),

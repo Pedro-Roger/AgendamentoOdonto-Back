@@ -4,6 +4,8 @@ import type { StringValue } from 'ms';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { UsersRepository } from '../users/repositories/users.repository';
+import { USERS_REPOSITORY } from '../users/repositories/users.repository.interface';
 
 @Module({
   imports: [
@@ -14,7 +16,11 @@ import { AuthService } from './auth.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaService],
+  providers: [
+    AuthService,
+    PrismaService,
+    { provide: USERS_REPOSITORY, useClass: UsersRepository },
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}
