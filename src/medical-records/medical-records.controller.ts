@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -27,13 +28,13 @@ const ALLOWED_MIME = new Set([
 
 @Controller('api/medical-records')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('MASTER', 'ADMIN')
+@Roles('MASTER', 'ADMIN', 'DENTISTA')
 export class MedicalRecordsController {
   constructor(private readonly medicalRecordsService: MedicalRecordsService) {}
 
   @Post()
   create(@Body() body: CreateMedicalRecordDto) {
-    return this.medicalRecordsService.create(body.appointmentId, body.content);
+    return this.medicalRecordsService.upsertByPatient(body.patientId, body.content);
   }
 
   @Post(':id/duplicate')
@@ -44,6 +45,16 @@ export class MedicalRecordsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.medicalRecordsService.findOne(id);
+  }
+
+  @Get('patient/:patientId')
+  findByPatient(@Param('patientId') patientId: string) {
+    return this.medicalRecordsService.findByPatient(patientId);
+  }
+
+  @Get(':id/attachments')
+  listAttachments(@Param('id') id: string) {
+    return this.medicalRecordsService.listAttachments(id);
   }
 
   @Post(':id/attachments')

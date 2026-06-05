@@ -14,7 +14,7 @@ export class SignaturesController {
 
   @Post('signatures/physical')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('MASTER', 'ADMIN')
+  @Roles('MASTER', 'ADMIN', 'DENTISTA')
   @UseInterceptors(FileInterceptor('file'))
   uploadPhysical(@UploadedFile() file: Express.Multer.File, @Body() body: UploadPhysicalSignatureDto) {
     return this.signaturesService.uploadPhysical(body.medicalRecordId, file);
@@ -22,7 +22,7 @@ export class SignaturesController {
 
   @Post('signatures/electronic/generate-link')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('MASTER', 'ADMIN')
+  @Roles('MASTER', 'ADMIN', 'DENTISTA')
   generateElectronicLink(@Body() body: GenerateElectronicLinkDto) {
     return this.signaturesService.generateElectronicLink(body.medicalRecordId);
   }

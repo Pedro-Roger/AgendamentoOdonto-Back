@@ -10,8 +10,11 @@ import { FormSettingsRepository } from '../clinic-config/repositories/form-setti
 import { FORM_SETTINGS_REPOSITORY } from '../clinic-config/repositories/form-settings.repository.interface';
 import { AppointmentsRepository } from '../appointments/repositories/appointments.repository';
 import { APPOINTMENTS_REPOSITORY } from '../appointments/repositories/appointments.repository.interface';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { WhatsAppModule } from '../whatsapp/whatsapp.module';
 
 @Module({
+  imports: [NotificationsModule, WhatsAppModule],
   controllers: [PatientAppointmentsController],
   providers: [
     PatientAppointmentsService,

@@ -7,8 +7,12 @@ import { IMedicalRecordsRepository } from './medical-records.repository.interfac
 export class MedicalRecordsRepository implements IMedicalRecordsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(data: { appointmentId: string; content: Prisma.InputJsonValue; version: number }): Promise<MedicalRecord> {
+  create(data: { patientId: string; appointmentId?: string; content: Prisma.InputJsonValue; version: number }): Promise<MedicalRecord> {
     return this.prisma.medicalRecord.create({ data });
+  }
+
+  update(id: string, data: { content: Prisma.InputJsonValue }): Promise<MedicalRecord> {
+    return this.prisma.medicalRecord.update({ where: { id }, data });
   }
 
   findById(id: string): Promise<MedicalRecord | null> {
@@ -17,8 +21,15 @@ export class MedicalRecordsRepository implements IMedicalRecordsRepository {
 
   findByPatient(patientId: string): Promise<MedicalRecord[]> {
     return this.prisma.medicalRecord.findMany({
-      where: { appointment: { patientId } },
-      orderBy: { createdAt: 'desc' },
+      where: { patientId },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
+
+  findLatestByPatient(patientId: string): Promise<MedicalRecord | null> {
+    return this.prisma.medicalRecord.findFirst({
+      where: { patientId },
+      orderBy: { updatedAt: 'desc' },
     });
   }
 
@@ -28,5 +39,12 @@ export class MedicalRecordsRepository implements IMedicalRecordsRepository {
     category: string;
   }): Promise<MedicalRecordAttachment> {
     return this.prisma.medicalRecordAttachment.create({ data });
+  }
+
+  findAttachments(medicalRecordId: string): Promise<MedicalRecordAttachment[]> {
+    return this.prisma.medicalRecordAttachment.findMany({
+      where: { medicalRecordId },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 }

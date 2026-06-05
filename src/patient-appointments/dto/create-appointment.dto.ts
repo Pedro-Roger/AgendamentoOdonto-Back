@@ -2,9 +2,11 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsEmail,
+  IsOptional,
   IsString,
   Length,
   Matches,
+  MaxLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -41,6 +43,11 @@ export class CreateAppointmentDto {
 
   @Matches(/^\d{2}:\d{2}$/, { message: 'Hora deve estar no formato HH:mm' })
   time!: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
 
   @IsArray()
   @ValidateNested({ each: true })

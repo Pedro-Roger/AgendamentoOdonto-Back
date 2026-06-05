@@ -9,6 +9,8 @@ datasource db {
 enum UserRole {
   MASTER
   ADMIN
+  DENTISTA
+  RECEPCIONISTA
 }
 
 model Service {
@@ -33,12 +35,13 @@ model FormSetting {
   createdAt DateTime @default(now())
 }
 model Patient {
-  id           String        @id @default(cuid())
-  name         String
-  cpf          String        @unique
-  email        String
-  phone        String
-  appointments Appointment[]
+  id             String          @id @default(cuid())
+  name           String
+  cpf            String          @unique
+  email          String
+  phone          String
+  appointments   Appointment[]
+  medicalRecords MedicalRecord[]
 }
 model Appointment {
   id               String   @id @default(cuid())
@@ -46,19 +49,24 @@ model Appointment {
   serviceId        String
   date             String
   time             String
+  reason           String   @default("")
   anamnesisAnswers Json
   createdAt        DateTime @default(now())
   patient       Patient         @relation(fields: [patientId], references: [id])
   service       Service         @relation(fields: [serviceId], references: [id])
   medicalRecords MedicalRecord[]
+  reminder       AppointmentReminder?
 }
 model MedicalRecord {
   id            String   @id @default(cuid())
-  appointmentId String
+  patientId     String
+  appointmentId String?
   content       Json
   version       Int
   createdAt     DateTime @default(now())
-  appointment Appointment               @relation(fields: [appointmentId], references: [id])
+  updatedAt     DateTime @updatedAt
+  patient     Patient                   @relation(fields: [patientId], references: [id])
+  appointment Appointment?              @relation(fields: [appointmentId], references: [id])
   attachments MedicalRecordAttachment[]
   signatureTokens SignatureToken[]
 }
@@ -88,4 +96,34 @@ model User {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  type      String
+  title     String
+  message   String
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model WhatsAppConfig {
+  id             String   @id @default(cuid())
+  instanceId     String
+  token          String
+  clinicName     String
+  clinicAddress  String   @default("")
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model AppointmentReminder {
+  id              String    @id @default(cuid())
+  appointmentId   String    @unique
+  sentAt          DateTime  @default(now())
+  confirmedAt     DateTime?
+  token           String    @unique
+  appointment     Appointment @relation(fields: [appointmentId], references: [id])
 }

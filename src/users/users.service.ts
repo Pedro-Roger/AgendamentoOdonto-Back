@@ -31,12 +31,14 @@ export class UsersService {
     if (existing) {
       throw new ConflictException('Email já cadastrado');
     }
-    return this.usersRepository.create({
+    const user = await this.usersRepository.create({
       name: data.name.trim(),
       email: data.email.trim().toLowerCase(),
       password: hashSync(data.password, 10),
       role: (data.role as UserRole) ?? UserRole.ADMIN,
     });
+    const { password: _, ...safe } = user;
+    return safe;
   }
 
   async update(id: string, data: UpdateUserDto, currentUserId: string) {

@@ -55,7 +55,7 @@ export class PatientsService {
     const recordEvents: TimelineEvent[] = medicalRecords.map((r) => ({
       id: r.id,
       type: TimelineEventType.MEDICAL_RECORD,
-      title: `Prontuário v${r.version}`,
+      title: 'Prontuário',
       date: r.createdAt ? new Date(r.createdAt).toISOString().slice(0, 10) : '',
     }));
 

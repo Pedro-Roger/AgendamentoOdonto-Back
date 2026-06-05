@@ -15,8 +15,23 @@ export class MedicalRecordsService {
     private readonly s3Service: S3Service,
   ) {}
 
-  create(appointmentId: string, content: Record<string, unknown>) {
+  async upsertByPatient(patientId: string, content: Record<string, unknown>) {
+    const existing = await this.medicalRecordsRepository.findLatestByPatient(patientId);
+    if (existing) {
+      return this.medicalRecordsRepository.update(existing.id, {
+        content: content as Prisma.InputJsonValue,
+      });
+    }
     return this.medicalRecordsRepository.create({
+      patientId,
+      content: content as Prisma.InputJsonValue,
+      version: 1,
+    });
+  }
+
+  create(patientId: string, content: Record<string, unknown>, appointmentId?: string) {
+    return this.medicalRecordsRepository.create({
+      patientId,
       appointmentId,
       content: content as Prisma.InputJsonValue,
       version: 1,
@@ -28,7 +43,7 @@ export class MedicalRecordsService {
     if (!current) throw new NotFoundException('Prontuário não encontrado');
 
     return this.medicalRecordsRepository.create({
-      appointmentId: current.appointmentId,
+      patientId: current.patientId,
       content: current.content as Prisma.InputJsonValue,
       version: current.version + 1,
     });
@@ -40,6 +55,10 @@ export class MedicalRecordsService {
     return record;
   }
 
+  findByPatient(patientId: string) {
+    return this.medicalRecordsRepository.findLatestByPatient(patientId);
+  }
+
   async attach(id: string, file: Express.Multer.File) {
     const fileUrl = await this.s3Service.uploadFile(file.originalname, file.buffer);
     return this.medicalRecordsRepository.createAttachment({
@@ -47,5 +66,15 @@ export class MedicalRecordsService {
       fileUrl,
       category: AttachmentCategory.MEDICAL_ATTACHMENT,
     });
+  }
+
+  async listAttachments(medicalRecordId: string) {
+    const record = await this.medicalRecordsRepository.findById(medicalRecordId);
+    if (!record) throw new NotFoundException('Prontuário não encontrado');
+    const attachments = await this.medicalRecordsRepository.findAttachments(medicalRecordId);
+    return attachments.map((a) => ({
+      ...a,
+      fileUrl: this.s3Service.getSignedUrl(a.fileUrl),
+    }));
   }
 }

@@ -7,7 +7,7 @@ import { PatientsService } from './patients.service';
 
 @Controller('api/patients')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('MASTER', 'ADMIN')
+@Roles('MASTER', 'ADMIN', 'DENTISTA', 'RECEPCIONISTA')
 export class PatientsController {
   constructor(private readonly patientsService: PatientsService) {}
 

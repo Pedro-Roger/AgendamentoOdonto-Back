@@ -14,12 +14,17 @@ function todayIso() {
 
 @Controller('api/appointments')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('MASTER', 'ADMIN')
+@Roles('MASTER', 'ADMIN', 'DENTISTA', 'RECEPCIONISTA')
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Get()
   list(@Query('date') date?: string) {
     return this.appointmentsService.listByDate(date ?? todayIso());
+  }
+
+  @Get('week')
+  findByWeek(@Query('from') from: string, @Query('to') to: string) {
+    return this.appointmentsService.findByDateRange(from, to);
   }
 }

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import {
   APPOINTMENTS_REPOSITORY,
   IAppointmentsRepository,
@@ -10,6 +10,23 @@ export class AppointmentsService {
     @Inject(APPOINTMENTS_REPOSITORY)
     private readonly appointmentsRepository: IAppointmentsRepository,
   ) {}
+
+  async findByDateRange(from: string, to: string) {
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+      throw new BadRequestException('Datas inválidas');
+    }
+    if (toDate < fromDate) {
+      throw new BadRequestException('Data final deve ser maior ou igual à data inicial');
+    }
+    const diffMs = toDate.getTime() - fromDate.getTime();
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    if (diffDays > 31) {
+      throw new BadRequestException('Intervalo máximo de 31 dias');
+    }
+    return this.appointmentsRepository.findByDateRange(from, to);
+  }
 
   async listByDate(date: string) {
     const appointments = await this.appointmentsRepository.findByDateWithRelations(date);

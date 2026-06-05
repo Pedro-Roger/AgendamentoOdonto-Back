@@ -1,4 +1,12 @@
+import { IsOptional, IsString } from 'class-validator';
+
 export class CreateMedicalRecordDto {
-  appointmentId!: string;
+  @IsString()
+  patientId!: string;
+
+  @IsOptional()
+  @IsString()
+  appointmentId?: string;
+
   content!: Record<string, unknown>;
 }

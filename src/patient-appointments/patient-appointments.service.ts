@@ -18,6 +18,7 @@ import {
   APPOINTMENTS_REPOSITORY,
   IAppointmentsRepository,
 } from '../appointments/repositories/appointments.repository.interface';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PatientAppointmentsService {
@@ -27,6 +28,7 @@ export class PatientAppointmentsService {
     @Inject(SERVICES_REPOSITORY) private readonly servicesRepository: IServicesRepository,
     @Inject(FORM_SETTINGS_REPOSITORY) private readonly formSettingsRepository: IFormSettingsRepository,
     @Inject(APPOINTMENTS_REPOSITORY) private readonly appointmentsRepository: IAppointmentsRepository,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   listActiveServices() {
@@ -48,7 +50,7 @@ export class PatientAppointmentsService {
   }
 
   async createAppointment(payload: CreateAppointmentDto) {
-    return this.prisma.$transaction(async (tx) => {
+    const appointment = await this.prisma.$transaction(async (tx) => {
       const existing = await tx.patient.findUnique({ where: { cpf: payload.cpf } });
       const patient =
         existing ??
@@ -67,9 +69,21 @@ export class PatientAppointmentsService {
           serviceId: payload.serviceId,
           date: payload.date,
           time: payload.time,
+          reason: payload.reason ?? '',
           anamnesisAnswers: payload.anamnesisAnswers as unknown as Prisma.InputJsonValue,
         },
       });
     });
+
+    this.notificationsService
+      .create({
+        type: 'NEW_APPOINTMENT',
+        title: 'Nova consulta agendada',
+        message: `${payload.name} agendou para ${payload.date} às ${payload.time}`,
+        data: { appointmentId: appointment.id, patientName: payload.name },
+      })
+      .catch(() => {});
+
+    return appointment;
   }
 }
