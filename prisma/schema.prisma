@@ -87,6 +87,19 @@ model SignatureToken {
   medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
 }
 
+model Tenant {
+  id             String   @id @default(cuid())
+  name           String
+  slug           String   @unique
+  landingPageUrl String?
+  logoUrl        String?
+  phone          String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  users          User[]
+}
+
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -94,8 +107,10 @@ model User {
   password  String
   role      UserRole @default(ADMIN)
   isActive  Boolean  @default(true)
+  tenantId  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  tenant    Tenant?  @relation(fields: [tenantId], references: [id])
 }
 
 model Notification {

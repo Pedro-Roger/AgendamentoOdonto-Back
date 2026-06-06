@@ -19,6 +19,7 @@ const roles_decorator_1 = require("../common/auth/roles.decorator");
 const roles_guard_1 = require("../common/auth/roles.guard");
 const platform_express_1 = require("@nestjs/platform-express");
 const create_medical_record_dto_1 = require("./dto/create-medical-record.dto");
+const update_medical_record_dto_1 = require("./dto/update-medical-record.dto");
 const medical_records_service_1 = require("./medical-records.service");
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 const ALLOWED_MIME = new Set([
@@ -40,6 +41,15 @@ let MedicalRecordsController = class MedicalRecordsController {
     }
     findOne(id) {
         return this.medicalRecordsService.findOne(id);
+    }
+    listAllByPatient(patientId) {
+        return this.medicalRecordsService.listAllByPatient(patientId);
+    }
+    createForPatient(patientId, body) {
+        return this.medicalRecordsService.create(patientId, body.content ?? {});
+    }
+    updateRecord(id, body) {
+        return this.medicalRecordsService.updateById(id, body.content ?? {});
     }
     findByPatient(patientId) {
         return this.medicalRecordsService.findByPatient(patientId);
@@ -78,6 +88,29 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], MedicalRecordsController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Get)('patient/:patientId/history'),
+    __param(0, (0, common_1.Param)('patientId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], MedicalRecordsController.prototype, "listAllByPatient", null);
+__decorate([
+    (0, common_1.Post)('patient/:patientId/new'),
+    __param(0, (0, common_1.Param)('patientId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_medical_record_dto_1.UpdateMedicalRecordDto]),
+    __metadata("design:returntype", void 0)
+], MedicalRecordsController.prototype, "createForPatient", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_medical_record_dto_1.UpdateMedicalRecordDto]),
+    __metadata("design:returntype", void 0)
+], MedicalRecordsController.prototype, "updateRecord", null);
 __decorate([
     (0, common_1.Get)('patient/:patientId'),
     __param(0, (0, common_1.Param)('patientId')),

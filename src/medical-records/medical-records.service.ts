@@ -59,6 +59,18 @@ export class MedicalRecordsService {
     return this.medicalRecordsRepository.findLatestByPatient(patientId);
   }
 
+  listAllByPatient(patientId: string) {
+    return this.medicalRecordsRepository.findByPatient(patientId);
+  }
+
+  async updateById(id: string, content: Record<string, unknown>) {
+    const existing = await this.medicalRecordsRepository.findById(id);
+    if (!existing) throw new NotFoundException('Prontuário não encontrado');
+    return this.medicalRecordsRepository.update(id, {
+      content: content as Prisma.InputJsonValue,
+    });
+  }
+
   async attach(id: string, file: Express.Multer.File) {
     const fileUrl = await this.s3Service.uploadFile(file.originalname, file.buffer);
     return this.medicalRecordsRepository.createAttachment({

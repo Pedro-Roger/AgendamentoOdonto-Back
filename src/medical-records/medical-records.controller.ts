@@ -4,8 +4,8 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
-  Put,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -15,6 +15,7 @@ import { Roles } from '../common/auth/roles.decorator';
 import { RolesGuard } from '../common/auth/roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
+import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
 import { MedicalRecordsService } from './medical-records.service';
 
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
@@ -45,6 +46,24 @@ export class MedicalRecordsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.medicalRecordsService.findOne(id);
+  }
+
+  @Get('patient/:patientId/history')
+  listAllByPatient(@Param('patientId') patientId: string) {
+    return this.medicalRecordsService.listAllByPatient(patientId);
+  }
+
+  @Post('patient/:patientId/new')
+  createForPatient(
+    @Param('patientId') patientId: string,
+    @Body() body: UpdateMedicalRecordDto,
+  ) {
+    return this.medicalRecordsService.create(patientId, body.content ?? {});
+  }
+
+  @Patch(':id')
+  updateRecord(@Param('id') id: string, @Body() body: UpdateMedicalRecordDto) {
+    return this.medicalRecordsService.updateById(id, body.content ?? {});
   }
 
   @Get('patient/:patientId')

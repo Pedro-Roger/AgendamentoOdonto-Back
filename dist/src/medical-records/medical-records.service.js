@@ -62,6 +62,17 @@ let MedicalRecordsService = class MedicalRecordsService {
     findByPatient(patientId) {
         return this.medicalRecordsRepository.findLatestByPatient(patientId);
     }
+    listAllByPatient(patientId) {
+        return this.medicalRecordsRepository.findByPatient(patientId);
+    }
+    async updateById(id, content) {
+        const existing = await this.medicalRecordsRepository.findById(id);
+        if (!existing)
+            throw new common_1.NotFoundException('Prontuário não encontrado');
+        return this.medicalRecordsRepository.update(id, {
+            content: content,
+        });
+    }
     async attach(id, file) {
         const fileUrl = await this.s3Service.uploadFile(file.originalname, file.buffer);
         return this.medicalRecordsRepository.createAttachment({
