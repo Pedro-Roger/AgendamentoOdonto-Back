@@ -21,6 +21,7 @@ const patients_module_1 = require("./patients/patients.module");
 const users_module_1 = require("./users/users.module");
 const notifications_module_1 = require("./notifications/notifications.module");
 const whatsapp_module_1 = require("./whatsapp/whatsapp.module");
+const discord_module_1 = require("./common/discord/discord.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -42,6 +43,7 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             notifications_module_1.NotificationsModule,
             whatsapp_module_1.WhatsAppModule,
+            discord_module_1.DiscordModule,
         ],
         providers: [
             { provide: core_1.APP_GUARD, useClass: throttler_1.ThrottlerGuard },

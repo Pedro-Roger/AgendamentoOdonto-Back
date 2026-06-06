@@ -13,6 +13,7 @@ const whatsapp_config_repository_1 = require("./whatsapp-config.repository");
 const whatsapp_service_1 = require("./whatsapp.service");
 const whatsapp_config_controller_1 = require("./whatsapp-config.controller");
 const reminders_service_1 = require("./reminders.service");
+const baileys_service_1 = require("./baileys.service");
 let WhatsAppModule = class WhatsAppModule {
 };
 exports.WhatsAppModule = WhatsAppModule;
@@ -22,6 +23,7 @@ exports.WhatsAppModule = WhatsAppModule = __decorate([
         providers: [
             prisma_service_1.PrismaService,
             whatsapp_config_repository_1.WhatsAppConfigRepository,
+            baileys_service_1.BaileysService,
             whatsapp_service_1.WhatsAppService,
             reminders_service_1.RemindersService,
         ],

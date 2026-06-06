@@ -49,30 +49,28 @@ const schedule_1 = require("@nestjs/schedule");
 const prisma_service_1 = require("../prisma/prisma.service");
 const whatsapp_service_1 = require("./whatsapp.service");
 const whatsapp_config_repository_1 = require("./whatsapp-config.repository");
+const baileys_service_1 = require("./baileys.service");
 const crypto = __importStar(require("crypto"));
 let RemindersService = RemindersService_1 = class RemindersService {
-    constructor(prisma, whatsApp, configRepo) {
+    constructor(prisma, whatsApp, configRepo, baileys) {
         this.prisma = prisma;
         this.whatsApp = whatsApp;
         this.configRepo = configRepo;
+        this.baileys = baileys;
         this.logger = new common_1.Logger(RemindersService_1.name);
     }
     async sendDailyReminders() {
-        const config = await this.configRepo.findActive();
-        if (!config) {
-            this.logger.log('Lembretes: WhatsApp não configurado, pulando.');
+        if (this.baileys.getStatus() !== 'connected') {
+            this.logger.log('Lembretes: WhatsApp não conectado, pulando.');
             return;
         }
+        const config = await this.configRepo.findFirst();
+        const clinicName = config?.clinicName ?? 'Clínica';
+        const clinicAddress = config?.clinicAddress ?? '';
         const tomorrow = this.tomorrowIso();
         const appointments = await this.prisma.appointment.findMany({
-            where: {
-                date: tomorrow,
-                reminder: null,
-            },
-            include: {
-                patient: true,
-                service: true,
-            },
+            where: { date: tomorrow, reminder: null },
+            include: { patient: true, service: true },
         });
         this.logger.log(`Lembretes: ${appointments.length} consultas amanhã (${tomorrow})`);
         const baseUrl = process.env.APP_URL ?? 'https://app.sorriso.com.br';
@@ -85,8 +83,8 @@ let RemindersService = RemindersService_1 = class RemindersService {
                 serviceName: appt.service.name,
                 date: appt.date,
                 time: appt.time,
-                clinicName: config.clinicName,
-                clinicAddress: config.clinicAddress,
+                clinicName,
+                clinicAddress,
                 confirmationToken: token,
                 baseUrl,
             });
@@ -130,6 +128,7 @@ exports.RemindersService = RemindersService = RemindersService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         whatsapp_service_1.WhatsAppService,
-        whatsapp_config_repository_1.WhatsAppConfigRepository])
+        whatsapp_config_repository_1.WhatsAppConfigRepository,
+        baileys_service_1.BaileysService])
 ], RemindersService);
 //# sourceMappingURL=reminders.service.js.map

@@ -8,15 +8,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var WhatsAppService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WhatsAppService = void 0;
 const common_1 = require("@nestjs/common");
-const whatsapp_config_repository_1 = require("./whatsapp-config.repository");
-let WhatsAppService = WhatsAppService_1 = class WhatsAppService {
-    constructor(configRepo) {
-        this.configRepo = configRepo;
-        this.logger = new common_1.Logger(WhatsAppService_1.name);
+const baileys_service_1 = require("./baileys.service");
+let WhatsAppService = class WhatsAppService {
+    constructor(baileys) {
+        this.baileys = baileys;
     }
     formatPhone(raw) {
         const digits = raw.replace(/\D/g, '');
@@ -44,34 +42,12 @@ let WhatsAppService = WhatsAppService_1 = class WhatsAppService {
         ].join('\n');
     }
     async sendText(phone, message) {
-        const config = await this.configRepo.findActive();
-        if (!config) {
-            this.logger.warn('WhatsApp: nenhuma configuração ativa encontrada');
-            return false;
-        }
-        const formattedPhone = this.formatPhone(phone);
-        const url = `https://api.z-api.io/instances/${config.instanceId}/token/${config.token}/send-text`;
-        try {
-            const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: formattedPhone, message }),
-            });
-            if (!res.ok) {
-                this.logger.error(`WhatsApp: Z-API respondeu ${res.status}`);
-                return false;
-            }
-            return true;
-        }
-        catch (err) {
-            this.logger.error('WhatsApp: falha ao enviar mensagem', err);
-            return false;
-        }
+        return this.baileys.sendText(phone, message);
     }
 };
 exports.WhatsAppService = WhatsAppService;
-exports.WhatsAppService = WhatsAppService = WhatsAppService_1 = __decorate([
+exports.WhatsAppService = WhatsAppService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [whatsapp_config_repository_1.WhatsAppConfigRepository])
+    __metadata("design:paramtypes", [baileys_service_1.BaileysService])
 ], WhatsAppService);
 //# sourceMappingURL=whatsapp.service.js.map

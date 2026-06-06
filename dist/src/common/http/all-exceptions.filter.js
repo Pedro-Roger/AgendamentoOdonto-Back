@@ -5,15 +5,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var AllExceptionsFilter_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AllExceptionsFilter = void 0;
 const common_1 = require("@nestjs/common");
+const discord_service_1 = require("../discord/discord.service");
 let AllExceptionsFilter = AllExceptionsFilter_1 = class AllExceptionsFilter {
-    constructor() {
+    constructor(discord) {
+        this.discord = discord;
         this.logger = new common_1.Logger(AllExceptionsFilter_1.name);
     }
-    catch(exception, host) {
+    async catch(exception, host) {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse();
         const request = ctx.getRequest();
@@ -30,10 +35,41 @@ let AllExceptionsFilter = AllExceptionsFilter_1 = class AllExceptionsFilter {
             }
         }
         if (status >= 500) {
-            this.logger.error(`[${request.method}] ${request.url} -> ${status}`, exception instanceof Error ? exception.stack : String(exception));
-            if (isProd) {
+            const errorMessage = exception instanceof Error ? exception.message : String(exception);
+            const stackTrace = exception instanceof Error ? (exception.stack ?? errorMessage) : String(exception);
+            const user = request.user;
+            this.logger.error(`[${request.method}] ${request.url} -> ${status}`, stackTrace);
+            this.discord.sendAlert({
+                level: 'error',
+                title: `🚨 Erro ${status} — ${request.method} ${request.url}`,
+                description: `**Mensagem:** ${errorMessage}\n\`\`\`${stackTrace.slice(0, 1500)}\`\`\``,
+                fields: [
+                    {
+                        name: '📍 Endpoint',
+                        value: `\`${request.method} ${request.url}\``,
+                        inline: true,
+                    },
+                    {
+                        name: '👤 Usuário',
+                        value: user
+                            ? `${user.name ?? '?'} (${user.email ?? user.sub ?? '?'}) — ${user.role ?? '?'}`
+                            : 'Não autenticado',
+                        inline: true,
+                    },
+                    {
+                        name: '🔴 Status',
+                        value: `${status}`,
+                        inline: true,
+                    },
+                    {
+                        name: '💬 Erro',
+                        value: `\`${errorMessage.slice(0, 500)}\``,
+                        inline: false,
+                    },
+                ],
+            }).catch(() => null);
+            if (isProd)
                 safeMessage = 'Internal server error';
-            }
         }
         response.status(status).json({
             statusCode: status,
@@ -45,6 +81,7 @@ let AllExceptionsFilter = AllExceptionsFilter_1 = class AllExceptionsFilter {
 };
 exports.AllExceptionsFilter = AllExceptionsFilter;
 exports.AllExceptionsFilter = AllExceptionsFilter = AllExceptionsFilter_1 = __decorate([
-    (0, common_1.Catch)()
+    (0, common_1.Catch)(),
+    __metadata("design:paramtypes", [discord_service_1.DiscordService])
 ], AllExceptionsFilter);
 //# sourceMappingURL=all-exceptions.filter.js.map

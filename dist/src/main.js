@@ -5,6 +5,7 @@ const common_1 = require("@nestjs/common");
 const app_module_1 = require("./app.module");
 require("dotenv/config");
 const all_exceptions_filter_1 = require("./common/http/all-exceptions.filter");
+const discord_service_1 = require("./common/discord/discord.service");
 function assertEnv() {
     if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
         throw new Error('JWT_SECRET must be set and at least 32 chars');
@@ -28,7 +29,8 @@ async function bootstrap() {
         transform: true,
         transformOptions: { enableImplicitConversion: false },
     }));
-    app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter());
+    const discord = app.get(discord_service_1.DiscordService);
+    app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter(discord));
     await app.listen(Number(process.env.PORT ?? 3000));
 }
 void bootstrap();
