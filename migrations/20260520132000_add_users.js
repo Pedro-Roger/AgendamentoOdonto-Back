@@ -8,7 +8,7 @@ exports.up = async function up(knex) {
       table.string('name').notNullable();
       table.string('email').notNullable().unique();
       table.string('password').notNullable();
-      table.enu('role', ['MASTER', 'ADMIN']).notNullable().defaultTo('ADMIN');
+      table.enu('role', ['MASTER', 'ADMIN', 'DENTISTA', 'RECEPCIONISTA']).notNullable().defaultTo('ADMIN');
       table.timestamp('createdAt').notNullable().defaultTo(knex.fn.now());
       table.timestamp('updatedAt').notNullable().defaultTo(knex.fn.now());
     });
