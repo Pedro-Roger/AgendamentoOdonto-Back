@@ -24,12 +24,18 @@ exports.up = async function up(knex) {
     await knex.raw(`ALTER TABLE "User" DROP CONSTRAINT "${constraint.conname}"`);
   }
 
+  // Remove o DEFAULT antes de converter (PostgreSQL exige)
+  await knex.raw(`ALTER TABLE "User" ALTER COLUMN role DROP DEFAULT`);
+
   // Altera a coluna para usar o tipo nativo
   await knex.raw(`
     ALTER TABLE "User"
     ALTER COLUMN role TYPE "UserRole"
     USING role::"UserRole"
   `);
+
+  // Restaura o DEFAULT com o novo tipo
+  await knex.raw(`ALTER TABLE "User" ALTER COLUMN role SET DEFAULT 'ADMIN'::"UserRole"`);
 };
 
 /**
