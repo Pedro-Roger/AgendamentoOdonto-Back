@@ -1,10 +1,13 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { DiscordService } from '../discord/discord.service';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
 
-  catch(exception: unknown, host: ArgumentsHost) {
+  constructor(private readonly discord: DiscordService) {}
+
+  async catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const request = ctx.getRequest();
@@ -24,13 +27,46 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     if (status >= 500) {
+      const stack = exception instanceof Error ? exception.message : String(exception);
+      const user = request.user;
+
       this.logger.error(
         `[${request.method}] ${request.url} -> ${status}`,
         exception instanceof Error ? exception.stack : String(exception),
       );
-      if (isProd) {
-        safeMessage = 'Internal server error';
-      }
+
+      // Alerta Discord (fire-and-forget)
+      this.discord.sendAlert({
+        level: 'error',
+        title: `🚨 Erro ${status} — ${request.method} ${request.url}`,
+        description: `\`\`\`${stack.slice(0, 1800)}\`\`\``,
+        fields: [
+          {
+            name: '📍 Endpoint',
+            value: `\`${request.method} ${request.url}\``,
+            inline: true,
+          },
+          {
+            name: '👤 Usuário',
+            value: user
+              ? `${user.name ?? '?'} (${user.email ?? user.sub ?? '?'}) — ${user.role ?? '?'}`
+              : 'Não autenticado',
+            inline: true,
+          },
+          {
+            name: '🔴 Status',
+            value: `${status}`,
+            inline: true,
+          },
+          {
+            name: '💬 Mensagem',
+            value: Array.isArray(safeMessage) ? safeMessage.join(', ') : safeMessage,
+            inline: false,
+          },
+        ],
+      }).catch(() => null);
+
+      if (isProd) safeMessage = 'Internal server error';
     }
 
     response.status(status).json({

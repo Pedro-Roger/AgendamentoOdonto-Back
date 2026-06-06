@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import 'dotenv/config';
 import { AllExceptionsFilter } from './common/http/all-exceptions.filter';
+import { DiscordService } from './common/discord/discord.service';
 
 function assertEnv() {
   if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
@@ -36,7 +37,8 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalFilters(new AllExceptionsFilter());
+  const discord = app.get(DiscordService);
+  app.useGlobalFilters(new AllExceptionsFilter(discord));
 
   await app.listen(Number(process.env.PORT ?? 3000));
 }

@@ -12,6 +12,7 @@ import { PatientsModule } from './patients/patients.module';
 import { UsersModule } from './users/users.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { WhatsAppModule } from './whatsapp/whatsapp.module';
+import { DiscordModule } from './common/discord/discord.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { WhatsAppModule } from './whatsapp/whatsapp.module';
     UsersModule,
     NotificationsModule,
     WhatsAppModule,
+    DiscordModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
