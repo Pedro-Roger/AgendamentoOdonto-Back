@@ -23,9 +23,11 @@ services:
     container_name: agendamentoodonto-api
     restart: unless-stopped
     environment:
-      # A API continua acessando o banco internamente pelo nome do serviço 'postgres'
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/agendamento_odonto?schema=public
       PORT: 3000
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      APP_URL: ${APP_URL}
     depends_on:
       postgres:
         condition: service_healthy
