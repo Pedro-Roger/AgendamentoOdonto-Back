@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { WhatsAppService } from './whatsapp.service';
 import { WhatsAppConfigRepository } from './whatsapp-config.repository';
+import { BaileysService } from './baileys.service';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -13,26 +14,24 @@ export class RemindersService {
     private readonly prisma: PrismaService,
     private readonly whatsApp: WhatsAppService,
     private readonly configRepo: WhatsAppConfigRepository,
+    private readonly baileys: BaileysService,
   ) {}
 
   @Cron('0 8 * * *', { name: 'appointment-reminders', timeZone: 'America/Sao_Paulo' })
   async sendDailyReminders() {
-    const config = await this.configRepo.findActive();
-    if (!config) {
-      this.logger.log('Lembretes: WhatsApp não configurado, pulando.');
+    if (this.baileys.getStatus() !== 'connected') {
+      this.logger.log('Lembretes: WhatsApp não conectado, pulando.');
       return;
     }
 
+    const config = await this.configRepo.findFirst();
+    const clinicName = config?.clinicName ?? 'Clínica';
+    const clinicAddress = config?.clinicAddress ?? '';
+
     const tomorrow = this.tomorrowIso();
     const appointments = await this.prisma.appointment.findMany({
-      where: {
-        date: tomorrow,
-        reminder: null,
-      },
-      include: {
-        patient: true,
-        service: true,
-      },
+      where: { date: tomorrow, reminder: null },
+      include: { patient: true, service: true },
     });
 
     this.logger.log(`Lembretes: ${appointments.length} consultas amanhã (${tomorrow})`);
@@ -48,8 +47,8 @@ export class RemindersService {
         serviceName: appt.service.name,
         date: appt.date,
         time: appt.time,
-        clinicName: config.clinicName,
-        clinicAddress: config.clinicAddress,
+        clinicName,
+        clinicAddress,
         confirmationToken: token,
         baseUrl,
       });

@@ -33,7 +33,12 @@ services:
         condition: service_healthy
     ports:
       - "3000:3000" # Apenas a porta da API fica acessível publicamente
+    volumes:
+      - baileys_auth:/app/baileys-auth
+    environment:
+      BAILEYS_AUTH_DIR: /app/baileys-auth
     command: sh -c "npm run migrate && npx prisma generate && node dist/src/main.js"
 
 volumes:
   postgres_data:
+  baileys_auth:

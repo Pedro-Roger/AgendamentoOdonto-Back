@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { WhatsAppConfigRepository } from './whatsapp-config.repository';
+import { Injectable } from '@nestjs/common';
+import { BaileysService } from './baileys.service';
 
 type ReminderParams = {
   patientName: string;
@@ -14,9 +14,7 @@ type ReminderParams = {
 
 @Injectable()
 export class WhatsAppService {
-  private readonly logger = new Logger(WhatsAppService.name);
-
-  constructor(private readonly configRepo: WhatsAppConfigRepository) {}
+  constructor(private readonly baileys: BaileysService) {}
 
   formatPhone(raw: string): string {
     const digits = raw.replace(/\D/g, '');
@@ -45,31 +43,6 @@ export class WhatsAppService {
   }
 
   async sendText(phone: string, message: string): Promise<boolean> {
-    const config = await this.configRepo.findActive();
-    if (!config) {
-      this.logger.warn('WhatsApp: nenhuma configuração ativa encontrada');
-      return false;
-    }
-
-    const formattedPhone = this.formatPhone(phone);
-    const url = `https://api.z-api.io/instances/${config.instanceId}/token/${config.token}/send-text`;
-
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: formattedPhone, message }),
-      });
-
-      if (!res.ok) {
-        this.logger.error(`WhatsApp: Z-API respondeu ${res.status}`);
-        return false;
-      }
-
-      return true;
-    } catch (err) {
-      this.logger.error('WhatsApp: falha ao enviar mensagem', err);
-      return false;
-    }
+    return this.baileys.sendText(phone, message);
   }
 }
