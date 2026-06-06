@@ -27,19 +27,20 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     if (status >= 500) {
-      const stack = exception instanceof Error ? exception.message : String(exception);
+      const errorMessage = exception instanceof Error ? exception.message : String(exception);
+      const stackTrace = exception instanceof Error ? (exception.stack ?? errorMessage) : String(exception);
       const user = request.user;
 
       this.logger.error(
         `[${request.method}] ${request.url} -> ${status}`,
-        exception instanceof Error ? exception.stack : String(exception),
+        stackTrace,
       );
 
       // Alerta Discord (fire-and-forget)
       this.discord.sendAlert({
         level: 'error',
         title: `🚨 Erro ${status} — ${request.method} ${request.url}`,
-        description: `\`\`\`${stack.slice(0, 1800)}\`\`\``,
+        description: `**Mensagem:** ${errorMessage}\n\`\`\`${stackTrace.slice(0, 1500)}\`\`\``,
         fields: [
           {
             name: '📍 Endpoint',
@@ -59,8 +60,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
             inline: true,
           },
           {
-            name: '💬 Mensagem',
-            value: Array.isArray(safeMessage) ? safeMessage.join(', ') : safeMessage,
+            name: '💬 Erro',
+            value: `\`${errorMessage.slice(0, 500)}\``,
             inline: false,
           },
         ],
