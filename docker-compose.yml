@@ -5,8 +5,8 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_DB: agendamento_odonto
-      POSTGRES_USER: ${DB_USER} # Lido do arquivo .env
-      POSTGRES_PASSWORD: ${DB_PASSWORD} # Lido do arquivo .env
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     # A seção 'ports' foi removida. O banco agora está 100% invisível para a internet.
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -31,7 +31,7 @@ services:
         condition: service_healthy
     ports:
       - "3000:3000" # Apenas a porta da API fica acessível publicamente
-    command: sh -c "npx prisma db push && node dist/main.js"
+    command: sh -c "npm run migrate && npx prisma generate && node dist/src/main.js"
 
 volumes:
   postgres_data:
