@@ -40,7 +40,7 @@ exports.SignaturesController = SignaturesController;
 __decorate([
     (0, common_1.Post)('signatures/physical'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN', 'DENTISTA'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
     __param(0, (0, common_1.UploadedFile)()),
     __param(1, (0, common_1.Body)()),
@@ -51,7 +51,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)('signatures/electronic/generate-link'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN', 'DENTISTA'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [generate_electronic_link_dto_1.GenerateElectronicLinkDto]),

@@ -33,13 +33,19 @@ let MedicalRecordsController = class MedicalRecordsController {
         this.medicalRecordsService = medicalRecordsService;
     }
     create(body) {
-        return this.medicalRecordsService.create(body.appointmentId, body.content);
+        return this.medicalRecordsService.upsertByPatient(body.patientId, body.content);
     }
     duplicate(id) {
         return this.medicalRecordsService.duplicate(id);
     }
     findOne(id) {
         return this.medicalRecordsService.findOne(id);
+    }
+    findByPatient(patientId) {
+        return this.medicalRecordsService.findByPatient(patientId);
+    }
+    listAttachments(id) {
+        return this.medicalRecordsService.listAttachments(id);
     }
     attach(id, file) {
         if (!file)
@@ -73,6 +79,20 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MedicalRecordsController.prototype, "findOne", null);
 __decorate([
+    (0, common_1.Get)('patient/:patientId'),
+    __param(0, (0, common_1.Param)('patientId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], MedicalRecordsController.prototype, "findByPatient", null);
+__decorate([
+    (0, common_1.Get)(':id/attachments'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], MedicalRecordsController.prototype, "listAttachments", null);
+__decorate([
     (0, common_1.Post)(':id/attachments'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', { limits: { fileSize: MAX_ATTACHMENT_BYTES } })),
     __param(0, (0, common_1.Param)('id')),
@@ -84,7 +104,7 @@ __decorate([
 exports.MedicalRecordsController = MedicalRecordsController = __decorate([
     (0, common_1.Controller)('api/medical-records'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN', 'DENTISTA'),
     __metadata("design:paramtypes", [medical_records_service_1.MedicalRecordsService])
 ], MedicalRecordsController);
 //# sourceMappingURL=medical-records.controller.js.map

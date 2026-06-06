@@ -32,12 +32,14 @@ let UsersService = class UsersService {
         if (existing) {
             throw new common_1.ConflictException('Email já cadastrado');
         }
-        return this.usersRepository.create({
+        const user = await this.usersRepository.create({
             name: data.name.trim(),
             email: data.email.trim().toLowerCase(),
             password: (0, bcryptjs_1.hashSync)(data.password, 10),
             role: data.role ?? user_role_enum_1.UserRole.ADMIN,
         });
+        const { password: _, ...safe } = user;
+        return safe;
     }
     async update(id, data, currentUserId) {
         const target = await this.usersRepository.findById(id);

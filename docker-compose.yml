@@ -5,17 +5,17 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_DB: agendamento_odonto
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
+      POSTGRES_USER: ${DB_USER} # Lido do arquivo .env
+      POSTGRES_PASSWORD: ${DB_PASSWORD} # Lido do arquivo .env
+    # A seção 'ports' foi removida. O banco agora está 100% invisível para a internet.
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d agendamento_odonto"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d agendamento_odonto"]
       interval: 10s
       timeout: 5s
       retries: 5
+
   api:
     build:
       context: .
@@ -23,13 +23,14 @@ services:
     container_name: agendamentoodonto-api
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/agendamento_odonto?schema=public
+      # A API continua acessando o banco internamente pelo nome do serviço 'postgres'
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/agendamento_odonto?schema=public
       PORT: 3000
     depends_on:
       postgres:
         condition: service_healthy
     ports:
-      - "3000:3000"
+      - "3000:3000" # Apenas a porta da API fica acessível publicamente
     command: sh -c "npx prisma db push && node dist/main.js"
 
 volumes:

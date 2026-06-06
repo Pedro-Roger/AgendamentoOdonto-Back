@@ -10,6 +10,7 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const throttler_1 = require("@nestjs/throttler");
+const schedule_1 = require("@nestjs/schedule");
 const auth_module_1 = require("./auth/auth.module");
 const clinic_config_module_1 = require("./clinic-config/clinic-config.module");
 const patient_appointments_module_1 = require("./patient-appointments/patient-appointments.module");
@@ -18,6 +19,8 @@ const medical_records_module_1 = require("./medical-records/medical-records.modu
 const signatures_module_1 = require("./signatures.module");
 const patients_module_1 = require("./patients/patients.module");
 const users_module_1 = require("./users/users.module");
+const notifications_module_1 = require("./notifications/notifications.module");
+const whatsapp_module_1 = require("./whatsapp/whatsapp.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -28,6 +31,7 @@ exports.AppModule = AppModule = __decorate([
                 { name: 'short', ttl: 60_000, limit: 30 },
                 { name: 'medium', ttl: 60 * 60_000, limit: 300 },
             ]),
+            schedule_1.ScheduleModule.forRoot(),
             auth_module_1.AuthModule,
             clinic_config_module_1.ClinicConfigModule,
             patient_appointments_module_1.PatientAppointmentsModule,
@@ -36,6 +40,8 @@ exports.AppModule = AppModule = __decorate([
             signatures_module_1.SignaturesModule,
             patients_module_1.PatientsModule,
             users_module_1.UsersModule,
+            notifications_module_1.NotificationsModule,
+            whatsapp_module_1.WhatsAppModule,
         ],
         providers: [
             { provide: core_1.APP_GUARD, useClass: throttler_1.ThrottlerGuard },

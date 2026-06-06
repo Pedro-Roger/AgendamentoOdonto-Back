@@ -16,9 +16,11 @@ exports.PatientAppointmentsController = void 0;
 const common_1 = require("@nestjs/common");
 const create_appointment_dto_1 = require("./dto/create-appointment.dto");
 const patient_appointments_service_1 = require("./patient-appointments.service");
+const reminders_service_1 = require("../whatsapp/reminders.service");
 let PatientAppointmentsController = class PatientAppointmentsController {
-    constructor(patientAppointmentsService) {
+    constructor(patientAppointmentsService, remindersService) {
         this.patientAppointmentsService = patientAppointmentsService;
+        this.remindersService = remindersService;
     }
     getAvailableSchedules(serviceId, date) {
         return this.patientAppointmentsService.getAvailableSchedules(serviceId, date);
@@ -31,6 +33,10 @@ let PatientAppointmentsController = class PatientAppointmentsController {
     }
     getFormSettings() {
         return this.patientAppointmentsService.getFormSettings();
+    }
+    async confirmAppointment(token) {
+        const confirmed = await this.remindersService.confirmAppointment(token);
+        return { confirmed };
     }
 };
 exports.PatientAppointmentsController = PatientAppointmentsController;
@@ -61,8 +67,16 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], PatientAppointmentsController.prototype, "getFormSettings", null);
+__decorate([
+    (0, common_1.Post)('confirm/:token'),
+    __param(0, (0, common_1.Param)('token')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], PatientAppointmentsController.prototype, "confirmAppointment", null);
 exports.PatientAppointmentsController = PatientAppointmentsController = __decorate([
     (0, common_1.Controller)('api/public'),
-    __metadata("design:paramtypes", [patient_appointments_service_1.PatientAppointmentsService])
+    __metadata("design:paramtypes", [patient_appointments_service_1.PatientAppointmentsService,
+        reminders_service_1.RemindersService])
 ], PatientAppointmentsController);
 //# sourceMappingURL=patient-appointments.controller.js.map

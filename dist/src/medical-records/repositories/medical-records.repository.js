@@ -19,17 +19,32 @@ let MedicalRecordsRepository = class MedicalRecordsRepository {
     create(data) {
         return this.prisma.medicalRecord.create({ data });
     }
+    update(id, data) {
+        return this.prisma.medicalRecord.update({ where: { id }, data });
+    }
     findById(id) {
         return this.prisma.medicalRecord.findUnique({ where: { id } });
     }
     findByPatient(patientId) {
         return this.prisma.medicalRecord.findMany({
-            where: { appointment: { patientId } },
-            orderBy: { createdAt: 'desc' },
+            where: { patientId },
+            orderBy: { updatedAt: 'desc' },
+        });
+    }
+    findLatestByPatient(patientId) {
+        return this.prisma.medicalRecord.findFirst({
+            where: { patientId },
+            orderBy: { updatedAt: 'desc' },
         });
     }
     createAttachment(data) {
         return this.prisma.medicalRecordAttachment.create({ data });
+    }
+    findAttachments(medicalRecordId) {
+        return this.prisma.medicalRecordAttachment.findMany({
+            where: { medicalRecordId },
+            orderBy: { createdAt: 'desc' },
+        });
     }
 };
 exports.MedicalRecordsRepository = MedicalRecordsRepository;

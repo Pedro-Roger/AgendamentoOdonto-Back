@@ -12,15 +12,30 @@ describe('Feature 03 - Prontuario Digital', () => {
     let app;
     const prismaMock = {
         medicalRecord: {
-            create: jest.fn(({ data }) => ({ id: 'mr_1', ...data })),
-            findUnique: jest.fn(() => ({ id: 'mr_1', appointmentId: 'apt_1', content: { queixa: 'dor' }, version: 1 })),
+            create: jest.fn(({ data }) => ({ id: 'mr_1', patientId: data.patientId ?? 'p_1', content: data.content ?? {}, version: data.version ?? 1, updatedAt: new Date() })),
+            findUnique: jest.fn(() => ({ id: 'mr_1', patientId: 'p_1', content: { queixa: 'dor' }, version: 1, updatedAt: new Date() })),
+            findFirst: jest.fn(() => null),
+            update: jest.fn(({ data }) => ({ id: 'mr_1', patientId: 'p_1', ...data, updatedAt: new Date() })),
+            findMany: jest.fn(() => []),
         },
         medicalRecordAttachment: {
             create: jest.fn(({ data }) => ({ id: 'att_1', ...data })),
+            findMany: jest.fn(() => []),
+        },
+        notification: {
+            create: jest.fn(() => ({})),
+            findMany: jest.fn(() => []),
+        },
+        whatsAppConfig: {
+            findFirst: jest.fn(() => null),
+        },
+        appointmentReminder: {
+            findUnique: jest.fn(() => null),
         },
     };
     const s3Mock = {
         uploadFile: jest.fn(() => 'https://s3.local/raio-x.png'),
+        getSignedUrl: jest.fn((url) => url),
     };
     beforeAll(async () => {
         const moduleRef = await testing_1.Test.createTestingModule({ imports: [app_module_1.AppModule] })
@@ -35,14 +50,17 @@ describe('Feature 03 - Prontuario Digital', () => {
     afterAll(async () => {
         await app.close();
     });
-    it('POST /api/medical-records cria prontuario', async () => {
-        await (0, supertest_1.default)(app.getHttpServer()).post('/api/medical-records').send({ appointmentId: 'apt_1', content: {} }).expect(201);
-    });
-    it('POST /api/medical-records/:id/duplicate duplica prontuario', async () => {
-        await (0, supertest_1.default)(app.getHttpServer()).post('/api/medical-records/mr_1/duplicate').expect(201);
+    it('POST /api/medical-records cria ou atualiza prontuario por paciente', async () => {
+        await (0, supertest_1.default)(app.getHttpServer())
+            .post('/api/medical-records')
+            .send({ patientId: 'p_1', content: {} })
+            .expect(201);
     });
     it('GET /api/medical-records/:id retorna prontuario', async () => {
         await (0, supertest_1.default)(app.getHttpServer()).get('/api/medical-records/mr_1').expect(200);
+    });
+    it('GET /api/medical-records/patient/:patientId retorna prontuario do paciente', async () => {
+        await (0, supertest_1.default)(app.getHttpServer()).get('/api/medical-records/patient/p_1').expect(200);
     });
     it('POST /api/medical-records/:id/attachments recebe multipart', async () => {
         await (0, supertest_1.default)(app.getHttpServer())

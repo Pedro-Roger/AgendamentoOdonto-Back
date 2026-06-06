@@ -47,7 +47,7 @@ let PatientsService = class PatientsService {
         const recordEvents = medicalRecords.map((r) => ({
             id: r.id,
             type: timeline_event_type_enum_1.TimelineEventType.MEDICAL_RECORD,
-            title: `Prontuário v${r.version}`,
+            title: 'Prontuário',
             date: r.createdAt ? new Date(r.createdAt).toISOString().slice(0, 10) : '',
         }));
         return [...appointmentEvents, ...recordEvents].sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''));

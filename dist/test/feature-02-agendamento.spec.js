@@ -32,6 +32,9 @@ describe('Feature 02 - Agendamento pelo Paciente', () => {
         schedule: { findMany: jest.fn(() => [{ weekDay: 3, startTime: '09:00', endTime: '10:00' }]) },
         appointment: { findMany: jest.fn(() => []) },
         $transaction: jest.fn((callback) => callback(tx)),
+        notification: { create: jest.fn(() => Promise.resolve({})) },
+        whatsAppConfig: { findFirst: jest.fn(() => null) },
+        appointmentReminder: { findUnique: jest.fn(() => null) },
     };
     beforeAll(async () => {
         const moduleRef = await testing_1.Test.createTestingModule({ imports: [app_module_1.AppModule] })

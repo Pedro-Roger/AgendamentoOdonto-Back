@@ -5,5 +5,7 @@ var UserRole;
 (function (UserRole) {
     UserRole["MASTER"] = "MASTER";
     UserRole["ADMIN"] = "ADMIN";
+    UserRole["DENTISTA"] = "DENTISTA";
+    UserRole["RECEPCIONISTA"] = "RECEPCIONISTA";
 })(UserRole || (exports.UserRole = UserRole = {}));
 //# sourceMappingURL=user-role.enum.js.map

@@ -32,6 +32,9 @@ let AppointmentsController = class AppointmentsController {
     list(date) {
         return this.appointmentsService.listByDate(date ?? todayIso());
     }
+    findByWeek(from, to) {
+        return this.appointmentsService.findByDateRange(from, to);
+    }
 };
 exports.AppointmentsController = AppointmentsController;
 __decorate([
@@ -41,10 +44,18 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], AppointmentsController.prototype, "list", null);
+__decorate([
+    (0, common_1.Get)('week'),
+    __param(0, (0, common_1.Query)('from')),
+    __param(1, (0, common_1.Query)('to')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], AppointmentsController.prototype, "findByWeek", null);
 exports.AppointmentsController = AppointmentsController = __decorate([
     (0, common_1.Controller)('api/appointments'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN', 'DENTISTA', 'RECEPCIONISTA'),
     __metadata("design:paramtypes", [appointments_service_1.AppointmentsService])
 ], AppointmentsController);
 //# sourceMappingURL=appointments.controller.js.map

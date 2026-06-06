@@ -19,13 +19,15 @@ const schedules_repository_interface_1 = require("../clinic-config/repositories/
 const services_repository_interface_1 = require("../clinic-config/repositories/services.repository.interface");
 const form_settings_repository_interface_1 = require("../clinic-config/repositories/form-settings.repository.interface");
 const appointments_repository_interface_1 = require("../appointments/repositories/appointments.repository.interface");
+const notifications_service_1 = require("../notifications/notifications.service");
 let PatientAppointmentsService = class PatientAppointmentsService {
-    constructor(prisma, schedulesRepository, servicesRepository, formSettingsRepository, appointmentsRepository) {
+    constructor(prisma, schedulesRepository, servicesRepository, formSettingsRepository, appointmentsRepository, notificationsService) {
         this.prisma = prisma;
         this.schedulesRepository = schedulesRepository;
         this.servicesRepository = servicesRepository;
         this.formSettingsRepository = formSettingsRepository;
         this.appointmentsRepository = appointmentsRepository;
+        this.notificationsService = notificationsService;
     }
     listActiveServices() {
         return this.servicesRepository.findActive();
@@ -43,7 +45,7 @@ let PatientAppointmentsService = class PatientAppointmentsService {
         return schedules.filter((s) => !bookedTimes.has(s.startTime));
     }
     async createAppointment(payload) {
-        return this.prisma.$transaction(async (tx) => {
+        const appointment = await this.prisma.$transaction(async (tx) => {
             const existing = await tx.patient.findUnique({ where: { cpf: payload.cpf } });
             const patient = existing ??
                 (await tx.patient.create({
@@ -60,10 +62,20 @@ let PatientAppointmentsService = class PatientAppointmentsService {
                     serviceId: payload.serviceId,
                     date: payload.date,
                     time: payload.time,
+                    reason: payload.reason ?? '',
                     anamnesisAnswers: payload.anamnesisAnswers,
                 },
             });
         });
+        this.notificationsService
+            .create({
+            type: 'NEW_APPOINTMENT',
+            title: 'Nova consulta agendada',
+            message: `${payload.name} agendou para ${payload.date} às ${payload.time}`,
+            data: { appointmentId: appointment.id, patientName: payload.name },
+        })
+            .catch(() => { });
+        return appointment;
     }
 };
 exports.PatientAppointmentsService = PatientAppointmentsService;
@@ -73,6 +85,6 @@ exports.PatientAppointmentsService = PatientAppointmentsService = __decorate([
     __param(2, (0, common_1.Inject)(services_repository_interface_1.SERVICES_REPOSITORY)),
     __param(3, (0, common_1.Inject)(form_settings_repository_interface_1.FORM_SETTINGS_REPOSITORY)),
     __param(4, (0, common_1.Inject)(appointments_repository_interface_1.APPOINTMENTS_REPOSITORY)),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, Object, Object, Object, Object])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, Object, Object, Object, Object, notifications_service_1.NotificationsService])
 ], PatientAppointmentsService);
 //# sourceMappingURL=patient-appointments.service.js.map

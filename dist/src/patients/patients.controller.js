@@ -58,7 +58,7 @@ __decorate([
 exports.PatientsController = PatientsController = __decorate([
     (0, common_1.Controller)('api/patients'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN', 'DENTISTA', 'RECEPCIONISTA'),
     __metadata("design:paramtypes", [patients_service_1.PatientsService])
 ], PatientsController);
 //# sourceMappingURL=patients.controller.js.map

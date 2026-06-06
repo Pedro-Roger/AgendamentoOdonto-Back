@@ -26,6 +26,16 @@ let AppointmentsRepository = class AppointmentsRepository {
             },
         });
     }
+    findByDateRange(from, to) {
+        return this.prisma.appointment.findMany({
+            where: { date: { gte: from, lte: to } },
+            orderBy: [{ date: 'asc' }, { time: 'asc' }],
+            include: {
+                patient: { select: { id: true, name: true, cpf: true, email: true, phone: true } },
+                service: { select: { id: true, name: true, durationMinutes: true } },
+            },
+        });
+    }
     findByServiceAndDate(serviceId, date) {
         return this.prisma.appointment.findMany({ where: { serviceId, date } });
     }

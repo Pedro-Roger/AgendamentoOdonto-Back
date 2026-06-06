@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClinicConfigController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../common/auth/jwt-auth.guard");
+const roles_guard_1 = require("../common/auth/roles.guard");
+const roles_decorator_1 = require("../common/auth/roles.decorator");
 const create_form_settings_dto_1 = require("./dto/create-form-settings.dto");
 const create_schedule_dto_1 = require("./dto/create-schedule.dto");
 const create_service_dto_1 = require("./dto/create-service.dto");
@@ -52,6 +54,7 @@ let ClinicConfigController = class ClinicConfigController {
 exports.ClinicConfigController = ClinicConfigController;
 __decorate([
     (0, common_1.Post)('services'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_service_dto_1.CreateServiceDto]),
@@ -59,12 +62,14 @@ __decorate([
 ], ClinicConfigController.prototype, "createService", null);
 __decorate([
     (0, common_1.Get)('services'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN', 'DENTISTA', 'RECEPCIONISTA'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ClinicConfigController.prototype, "listServices", null);
 __decorate([
     (0, common_1.Put)('services/:id'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -73,6 +78,7 @@ __decorate([
 ], ClinicConfigController.prototype, "updateService", null);
 __decorate([
     (0, common_1.Post)('schedules'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_schedule_dto_1.CreateScheduleDto]),
@@ -80,12 +86,14 @@ __decorate([
 ], ClinicConfigController.prototype, "createSchedule", null);
 __decorate([
     (0, common_1.Get)('schedules'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN', 'DENTISTA', 'RECEPCIONISTA'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ClinicConfigController.prototype, "listSchedules", null);
 __decorate([
     (0, common_1.Post)('form-settings'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_form_settings_dto_1.CreateFormSettingsDto]),
@@ -93,12 +101,14 @@ __decorate([
 ], ClinicConfigController.prototype, "createFormSettings", null);
 __decorate([
     (0, common_1.Get)('form-settings'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN', 'DENTISTA'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], ClinicConfigController.prototype, "getFormSettings", null);
 __decorate([
     (0, common_1.Put)('schedules'),
+    (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Array]),
@@ -106,7 +116,7 @@ __decorate([
 ], ClinicConfigController.prototype, "replaceSchedules", null);
 exports.ClinicConfigController = ClinicConfigController = __decorate([
     (0, common_1.Controller)('api'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [clinic_config_service_1.ClinicConfigService])
 ], ClinicConfigController);
 //# sourceMappingURL=clinic-config.controller.js.map

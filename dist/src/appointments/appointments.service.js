@@ -19,6 +19,22 @@ let AppointmentsService = class AppointmentsService {
     constructor(appointmentsRepository) {
         this.appointmentsRepository = appointmentsRepository;
     }
+    async findByDateRange(from, to) {
+        const fromDate = new Date(from);
+        const toDate = new Date(to);
+        if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+            throw new common_1.BadRequestException('Datas inválidas');
+        }
+        if (toDate < fromDate) {
+            throw new common_1.BadRequestException('Data final deve ser maior ou igual à data inicial');
+        }
+        const diffMs = toDate.getTime() - fromDate.getTime();
+        const diffDays = diffMs / (1000 * 60 * 60 * 24);
+        if (diffDays > 31) {
+            throw new common_1.BadRequestException('Intervalo máximo de 31 dias');
+        }
+        return this.appointmentsRepository.findByDateRange(from, to);
+    }
     async listByDate(date) {
         const appointments = await this.appointmentsRepository.findByDateWithRelations(date);
         return appointments.map((a) => ({

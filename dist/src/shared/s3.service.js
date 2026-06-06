@@ -12,6 +12,9 @@ let S3Service = class S3Service {
     async uploadFile(fileName, _content) {
         return `https://s3.local/${fileName}`;
     }
+    getSignedUrl(fileUrl) {
+        return fileUrl;
+    }
 };
 exports.S3Service = S3Service;
 exports.S3Service = S3Service = __decorate([
