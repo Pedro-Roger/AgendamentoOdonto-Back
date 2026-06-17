@@ -34,59 +34,62 @@ let MedicalRecordsController = class MedicalRecordsController {
     constructor(medicalRecordsService) {
         this.medicalRecordsService = medicalRecordsService;
     }
-    create(body) {
-        return this.medicalRecordsService.upsertByPatient(body.patientId, body.content);
+    create(user, body) {
+        return this.medicalRecordsService.upsertByPatient(body.patientId, body.content, user.tenantId);
     }
-    duplicate(id) {
-        return this.medicalRecordsService.duplicate(id);
+    duplicate(user, id) {
+        return this.medicalRecordsService.duplicate(id, user.tenantId);
     }
-    findOne(id) {
-        return this.medicalRecordsService.findOne(id);
+    findOne(user, id) {
+        return this.medicalRecordsService.findOne(id, user.tenantId);
     }
     listAllByPatient(user, patientId) {
         return this.medicalRecordsService.listAllByPatient(patientId, user.tenantId);
     }
-    createForPatient(patientId, body) {
-        return this.medicalRecordsService.create(patientId, body.content ?? {});
+    createForPatient(user, patientId, body) {
+        return this.medicalRecordsService.create(patientId, body.content ?? {}, user.tenantId);
     }
-    updateRecord(id, body) {
-        return this.medicalRecordsService.updateById(id, body.content ?? {});
+    updateRecord(user, id, body) {
+        return this.medicalRecordsService.updateById(id, body.content ?? {}, user.tenantId);
     }
-    findByPatient(patientId) {
-        return this.medicalRecordsService.findByPatient(patientId);
+    findByPatient(user, patientId) {
+        return this.medicalRecordsService.findByPatient(patientId, user.tenantId);
     }
-    listAttachments(id) {
-        return this.medicalRecordsService.listAttachments(id);
+    listAttachments(user, id) {
+        return this.medicalRecordsService.listAttachments(id, user.tenantId);
     }
-    attach(id, file) {
+    attach(user, id, file) {
         if (!file)
             throw new common_1.BadRequestException('Arquivo obrigatório');
         if (!ALLOWED_MIME.has(file.mimetype)) {
             throw new common_1.BadRequestException('Tipo de arquivo não permitido');
         }
-        return this.medicalRecordsService.attach(id, file);
+        return this.medicalRecordsService.attach(id, file, user.tenantId);
     }
 };
 exports.MedicalRecordsController = MedicalRecordsController;
 __decorate([
     (0, common_1.Post)(),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_medical_record_dto_1.CreateMedicalRecordDto]),
+    __metadata("design:paramtypes", [Object, create_medical_record_dto_1.CreateMedicalRecordDto]),
     __metadata("design:returntype", void 0)
 ], MedicalRecordsController.prototype, "create", null);
 __decorate([
     (0, common_1.Post)(':id/duplicate'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], MedicalRecordsController.prototype, "duplicate", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], MedicalRecordsController.prototype, "findOne", null);
 __decorate([
@@ -99,41 +102,46 @@ __decorate([
 ], MedicalRecordsController.prototype, "listAllByPatient", null);
 __decorate([
     (0, common_1.Post)('patient/:patientId/new'),
-    __param(0, (0, common_1.Param)('patientId')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('patientId')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_medical_record_dto_1.UpdateMedicalRecordDto]),
+    __metadata("design:paramtypes", [Object, String, update_medical_record_dto_1.UpdateMedicalRecordDto]),
     __metadata("design:returntype", void 0)
 ], MedicalRecordsController.prototype, "createForPatient", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_medical_record_dto_1.UpdateMedicalRecordDto]),
+    __metadata("design:paramtypes", [Object, String, update_medical_record_dto_1.UpdateMedicalRecordDto]),
     __metadata("design:returntype", void 0)
 ], MedicalRecordsController.prototype, "updateRecord", null);
 __decorate([
     (0, common_1.Get)('patient/:patientId'),
-    __param(0, (0, common_1.Param)('patientId')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('patientId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], MedicalRecordsController.prototype, "findByPatient", null);
 __decorate([
     (0, common_1.Get)(':id/attachments'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], MedicalRecordsController.prototype, "listAttachments", null);
 __decorate([
     (0, common_1.Post)(':id/attachments'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', { limits: { fileSize: MAX_ATTACHMENT_BYTES } })),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.UploadedFile)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", void 0)
 ], MedicalRecordsController.prototype, "attach", null);
 exports.MedicalRecordsController = MedicalRecordsController = __decorate([

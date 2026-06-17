@@ -19,11 +19,20 @@ let MedicalRecordsRepository = class MedicalRecordsRepository {
     create(data) {
         return this.prisma.medicalRecord.create({ data });
     }
-    update(id, data) {
-        return this.prisma.medicalRecord.update({ where: { id }, data });
+    async update(id, data, tenantId) {
+        const result = await this.prisma.medicalRecord.updateMany({
+            where: { id, patient: { tenantId } },
+            data,
+        });
+        if (result.count === 0) {
+            throw new common_1.NotFoundException('Prontuário não encontrado');
+        }
+        return this.prisma.medicalRecord.findFirstOrThrow({
+            where: { id, patient: { tenantId } },
+        });
     }
-    findById(id) {
-        return this.prisma.medicalRecord.findUnique({ where: { id } });
+    findById(id, tenantId) {
+        return this.prisma.medicalRecord.findFirst({ where: { id, patient: { tenantId } } });
     }
     findByPatient(patientId, tenantId) {
         return this.prisma.medicalRecord.findMany({
@@ -31,18 +40,24 @@ let MedicalRecordsRepository = class MedicalRecordsRepository {
             orderBy: { updatedAt: 'desc' },
         });
     }
-    findLatestByPatient(patientId) {
+    findLatestByPatient(patientId, tenantId) {
         return this.prisma.medicalRecord.findFirst({
-            where: { patientId },
+            where: { patientId, patient: { tenantId } },
             orderBy: { updatedAt: 'desc' },
         });
+    }
+    async patientBelongsToTenant(patientId, tenantId) {
+        return ((await this.prisma.patient.findFirst({
+            where: { id: patientId, tenantId },
+            select: { id: true },
+        })) !== null);
     }
     createAttachment(data) {
         return this.prisma.medicalRecordAttachment.create({ data });
     }
-    findAttachments(medicalRecordId) {
+    findAttachments(medicalRecordId, tenantId) {
         return this.prisma.medicalRecordAttachment.findMany({
-            where: { medicalRecordId },
+            where: { medicalRecordId, medicalRecord: { patient: { tenantId } } },
             orderBy: { createdAt: 'desc' },
         });
     }

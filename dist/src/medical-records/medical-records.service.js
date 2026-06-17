@@ -22,12 +22,13 @@ let MedicalRecordsService = class MedicalRecordsService {
         this.medicalRecordsRepository = medicalRecordsRepository;
         this.s3Service = s3Service;
     }
-    async upsertByPatient(patientId, content) {
-        const existing = await this.medicalRecordsRepository.findLatestByPatient(patientId);
+    async upsertByPatient(patientId, content, tenantId) {
+        if (!(await this.medicalRecordsRepository.patientBelongsToTenant(patientId, tenantId))) {
+            throw new common_1.NotFoundException('Paciente não encontrado');
+        }
+        const existing = await this.medicalRecordsRepository.findLatestByPatient(patientId, tenantId);
         if (existing) {
-            return this.medicalRecordsRepository.update(existing.id, {
-                content: content,
-            });
+            return this.medicalRecordsRepository.update(existing.id, { content: content }, tenantId);
         }
         return this.medicalRecordsRepository.create({
             patientId,
@@ -35,7 +36,10 @@ let MedicalRecordsService = class MedicalRecordsService {
             version: 1,
         });
     }
-    create(patientId, content, appointmentId) {
+    async create(patientId, content, tenantId, appointmentId) {
+        if (!(await this.medicalRecordsRepository.patientBelongsToTenant(patientId, tenantId))) {
+            throw new common_1.NotFoundException('Paciente não encontrado');
+        }
         return this.medicalRecordsRepository.create({
             patientId,
             appointmentId,
@@ -43,8 +47,8 @@ let MedicalRecordsService = class MedicalRecordsService {
             version: 1,
         });
     }
-    async duplicate(id) {
-        const current = await this.medicalRecordsRepository.findById(id);
+    async duplicate(id, tenantId) {
+        const current = await this.medicalRecordsRepository.findById(id, tenantId);
         if (!current)
             throw new common_1.NotFoundException('Prontuário não encontrado');
         return this.medicalRecordsRepository.create({
@@ -53,27 +57,28 @@ let MedicalRecordsService = class MedicalRecordsService {
             version: current.version + 1,
         });
     }
-    async findOne(id) {
-        const record = await this.medicalRecordsRepository.findById(id);
+    async findOne(id, tenantId) {
+        const record = await this.medicalRecordsRepository.findById(id, tenantId);
         if (!record)
             throw new common_1.NotFoundException('Prontuário não encontrado');
         return record;
     }
-    findByPatient(patientId) {
-        return this.medicalRecordsRepository.findLatestByPatient(patientId);
+    findByPatient(patientId, tenantId) {
+        return this.medicalRecordsRepository.findLatestByPatient(patientId, tenantId);
     }
     listAllByPatient(patientId, tenantId) {
         return this.medicalRecordsRepository.findByPatient(patientId, tenantId);
     }
-    async updateById(id, content) {
-        const existing = await this.medicalRecordsRepository.findById(id);
+    async updateById(id, content, tenantId) {
+        const existing = await this.medicalRecordsRepository.findById(id, tenantId);
         if (!existing)
             throw new common_1.NotFoundException('Prontuário não encontrado');
-        return this.medicalRecordsRepository.update(id, {
-            content: content,
-        });
+        return this.medicalRecordsRepository.update(id, { content: content }, tenantId);
     }
-    async attach(id, file) {
+    async attach(id, file, tenantId) {
+        const record = await this.medicalRecordsRepository.findById(id, tenantId);
+        if (!record)
+            throw new common_1.NotFoundException('Prontuário não encontrado');
         const fileUrl = await this.s3Service.uploadFile(file.originalname, file.buffer);
         return this.medicalRecordsRepository.createAttachment({
             medicalRecordId: id,
@@ -81,11 +86,11 @@ let MedicalRecordsService = class MedicalRecordsService {
             category: attachment_category_enum_1.AttachmentCategory.MEDICAL_ATTACHMENT,
         });
     }
-    async listAttachments(medicalRecordId) {
-        const record = await this.medicalRecordsRepository.findById(medicalRecordId);
+    async listAttachments(medicalRecordId, tenantId) {
+        const record = await this.medicalRecordsRepository.findById(medicalRecordId, tenantId);
         if (!record)
             throw new common_1.NotFoundException('Prontuário não encontrado');
-        const attachments = await this.medicalRecordsRepository.findAttachments(medicalRecordId);
+        const attachments = await this.medicalRecordsRepository.findAttachments(medicalRecordId, tenantId);
         return attachments.map((a) => ({
             ...a,
             fileUrl: this.s3Service.getSignedUrl(a.fileUrl),

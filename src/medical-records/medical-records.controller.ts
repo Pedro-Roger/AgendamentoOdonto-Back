@@ -36,18 +36,18 @@ export class MedicalRecordsController {
   constructor(private readonly medicalRecordsService: MedicalRecordsService) {}
 
   @Post()
-  create(@Body() body: CreateMedicalRecordDto) {
-    return this.medicalRecordsService.upsertByPatient(body.patientId, body.content);
+  create(@CurrentUser() user: JwtPayload, @Body() body: CreateMedicalRecordDto) {
+    return this.medicalRecordsService.upsertByPatient(body.patientId, body.content, user.tenantId);
   }
 
   @Post(':id/duplicate')
-  duplicate(@Param('id') id: string) {
-    return this.medicalRecordsService.duplicate(id);
+  duplicate(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.medicalRecordsService.duplicate(id, user.tenantId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.medicalRecordsService.findOne(id);
+  findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.medicalRecordsService.findOne(id, user.tenantId);
   }
 
   @Get('patient/:patientId/history')
@@ -60,34 +60,43 @@ export class MedicalRecordsController {
 
   @Post('patient/:patientId/new')
   createForPatient(
+    @CurrentUser() user: JwtPayload,
     @Param('patientId') patientId: string,
     @Body() body: UpdateMedicalRecordDto,
   ) {
-    return this.medicalRecordsService.create(patientId, body.content ?? {});
+    return this.medicalRecordsService.create(patientId, body.content ?? {}, user.tenantId);
   }
 
   @Patch(':id')
-  updateRecord(@Param('id') id: string, @Body() body: UpdateMedicalRecordDto) {
-    return this.medicalRecordsService.updateById(id, body.content ?? {});
+  updateRecord(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @Body() body: UpdateMedicalRecordDto,
+  ) {
+    return this.medicalRecordsService.updateById(id, body.content ?? {}, user.tenantId);
   }
 
   @Get('patient/:patientId')
-  findByPatient(@Param('patientId') patientId: string) {
-    return this.medicalRecordsService.findByPatient(patientId);
+  findByPatient(@CurrentUser() user: JwtPayload, @Param('patientId') patientId: string) {
+    return this.medicalRecordsService.findByPatient(patientId, user.tenantId);
   }
 
   @Get(':id/attachments')
-  listAttachments(@Param('id') id: string) {
-    return this.medicalRecordsService.listAttachments(id);
+  listAttachments(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.medicalRecordsService.listAttachments(id, user.tenantId);
   }
 
   @Post(':id/attachments')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_ATTACHMENT_BYTES } }))
-  attach(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+  attach(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     if (!file) throw new BadRequestException('Arquivo obrigatório');
     if (!ALLOWED_MIME.has(file.mimetype)) {
       throw new BadRequestException('Tipo de arquivo não permitido');
     }
-    return this.medicalRecordsService.attach(id, file);
+    return this.medicalRecordsService.attach(id, file, user.tenantId);
   }
 }
