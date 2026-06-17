@@ -31,27 +31,34 @@ export class PatientAppointmentsService {
     private readonly notificationsService: NotificationsService,
   ) {}
 
-  listActiveServices() {
-    return this.servicesRepository.findActive();
+  listActiveServices(tenantId: string) {
+    return this.servicesRepository.findActive(tenantId);
   }
 
-  getFormSettings() {
-    return this.formSettingsRepository.findLatest();
+  getFormSettings(tenantId: string) {
+    return this.formSettingsRepository.findLatest(tenantId);
   }
 
-  async getAvailableSchedules(serviceId: string, date: string) {
+  async getAvailableSchedules(tenantId: string, serviceId: string, date: string) {
     const weekDay = new Date(`${date}T00:00:00`).getDay();
     const [schedules, appointments] = await Promise.all([
-      this.schedulesRepository.findByWeekDay(weekDay),
-      this.appointmentsRepository.findByServiceAndDate(serviceId, date),
+      this.schedulesRepository.findByWeekDay(weekDay, tenantId),
+      this.appointmentsRepository.findByServiceAndDate(serviceId, date, tenantId),
     ]);
     const bookedTimes = new Set(appointments.map((a) => a.time));
     return schedules.filter((s) => !bookedTimes.has(s.startTime));
   }
 
-  async createAppointment(payload: CreateAppointmentDto) {
+  async createAppointment(
+    tenantId: string,
+    payload: CreateAppointmentDto,
+    source = 'INTERNAL',
+    apiKeyId?: string,
+  ) {
     const appointment = await this.prisma.$transaction(async (tx) => {
-      const existing = await tx.patient.findUnique({ where: { cpf: payload.cpf } });
+      const existing = await tx.patient.findUnique({
+        where: { cpf_tenantId: { cpf: payload.cpf, tenantId } },
+      });
       const patient =
         existing ??
         (await tx.patient.create({
@@ -60,6 +67,7 @@ export class PatientAppointmentsService {
             cpf: payload.cpf,
             email: payload.email,
             phone: payload.phone,
+            tenantId,
           },
         }));
 
@@ -71,6 +79,9 @@ export class PatientAppointmentsService {
           time: payload.time,
           reason: payload.reason ?? '',
           anamnesisAnswers: payload.anamnesisAnswers as unknown as Prisma.InputJsonValue,
+          tenantId,
+          source,
+          apiKeyId,
         },
       });
     });
@@ -81,6 +92,7 @@ export class PatientAppointmentsService {
         title: 'Nova consulta agendada',
         message: `${payload.name} agendou para ${payload.date} às ${payload.time}`,
         data: { appointmentId: appointment.id, patientName: payload.name },
+        tenantId,
       })
       .catch(() => {});
 

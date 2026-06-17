@@ -8,13 +8,16 @@ import { IFormSettingsRepository } from './form-settings.repository.interface';
 export class FormSettingsRepository implements IFormSettingsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(fields: FormFieldDto[]): Promise<FormSetting> {
+  create(fields: FormFieldDto[], tenantId: string): Promise<FormSetting> {
     return this.prisma.formSetting.create({
-      data: { fields: fields as unknown as Prisma.InputJsonValue },
+      data: { fields: fields as unknown as Prisma.InputJsonValue, tenantId },
     });
   }
 
-  findLatest(): Promise<FormSetting | null> {
-    return this.prisma.formSetting.findFirst({ orderBy: { createdAt: 'desc' } });
+  findLatest(tenantId: string): Promise<FormSetting | null> {
+    return this.prisma.formSetting.findFirst({
+      where: { tenantId },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 }

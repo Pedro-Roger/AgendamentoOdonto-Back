@@ -8,24 +8,24 @@ import { ISchedulesRepository } from './schedules.repository.interface';
 export class SchedulesRepository implements ISchedulesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(data: CreateScheduleDto): Promise<Schedule> {
-    return this.prisma.schedule.create({ data });
+  create(data: CreateScheduleDto, tenantId: string): Promise<Schedule> {
+    return this.prisma.schedule.create({ data: { ...data, tenantId } });
   }
 
-  findAll(): Promise<Schedule[]> {
-    return this.prisma.schedule.findMany({ orderBy: { weekDay: 'asc' } });
+  findAll(tenantId: string): Promise<Schedule[]> {
+    return this.prisma.schedule.findMany({ where: { tenantId }, orderBy: { weekDay: 'asc' } });
   }
 
-  findByWeekDay(weekDay: number): Promise<Schedule[]> {
-    return this.prisma.schedule.findMany({ where: { weekDay } });
+  findByWeekDay(weekDay: number, tenantId: string): Promise<Schedule[]> {
+    return this.prisma.schedule.findMany({ where: { weekDay, tenantId } });
   }
 
-  async replaceAll(schedules: CreateScheduleDto[]): Promise<Schedule[]> {
+  async replaceAll(schedules: CreateScheduleDto[], tenantId: string): Promise<Schedule[]> {
     return this.prisma.$transaction(async (tx) => {
-      await tx.schedule.deleteMany({});
+      await tx.schedule.deleteMany({ where: { tenantId } });
       if (schedules.length === 0) return [];
-      await tx.schedule.createMany({ data: schedules });
-      return tx.schedule.findMany({ orderBy: { weekDay: 'asc' } });
+      await tx.schedule.createMany({ data: schedules.map((s) => ({ ...s, tenantId })) });
+      return tx.schedule.findMany({ where: { tenantId }, orderBy: { weekDay: 'asc' } });
     });
   }
 }

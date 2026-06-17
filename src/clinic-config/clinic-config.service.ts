@@ -24,35 +24,35 @@ export class ClinicConfigService {
     @Inject(FORM_SETTINGS_REPOSITORY) private readonly formSettingsRepository: IFormSettingsRepository,
   ) {}
 
-  createService(data: CreateServiceDto) {
-    return this.servicesRepository.create(data);
+  createService(data: CreateServiceDto, tenantId: string) {
+    return this.servicesRepository.create(data, tenantId);
   }
 
-  listActiveServices() {
-    return this.servicesRepository.findActive();
+  listActiveServices(tenantId: string) {
+    return this.servicesRepository.findActive(tenantId);
   }
 
-  updateService(id: string, data: UpdateServiceDto) {
-    return this.servicesRepository.update(id, data);
+  updateService(id: string, data: UpdateServiceDto, tenantId: string) {
+    return this.servicesRepository.update(id, data, tenantId);
   }
 
-  createSchedule(data: CreateScheduleDto) {
-    return this.schedulesRepository.create(data);
+  createSchedule(data: CreateScheduleDto, tenantId: string) {
+    return this.schedulesRepository.create(data, tenantId);
   }
 
-  listSchedules() {
-    return this.schedulesRepository.findAll();
+  listSchedules(tenantId: string) {
+    return this.schedulesRepository.findAll(tenantId);
   }
 
-  replaceSchedules(schedules: CreateScheduleDto[]) {
-    return this.schedulesRepository.replaceAll(schedules);
+  replaceSchedules(schedules: CreateScheduleDto[], tenantId: string) {
+    return this.schedulesRepository.replaceAll(schedules, tenantId);
   }
 
-  createFormSettings(fields: FormFieldDto[]) {
-    return this.formSettingsRepository.create(fields);
+  createFormSettings(fields: FormFieldDto[], tenantId: string) {
+    return this.formSettingsRepository.create(fields, tenantId);
   }
 
-  getFormSettings() {
-    return this.formSettingsRepository.findLatest();
+  getFormSettings(tenantId: string) {
+    return this.formSettingsRepository.findLatest(tenantId);
   }
 }
