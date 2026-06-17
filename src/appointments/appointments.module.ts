@@ -4,8 +4,10 @@ import { AppointmentsController } from './appointments.controller';
 import { AppointmentsService } from './appointments.service';
 import { AppointmentsRepository } from './repositories/appointments.repository';
 import { APPOINTMENTS_REPOSITORY } from './repositories/appointments.repository.interface';
+import { PatientAppointmentsModule } from '../patient-appointments/patient-appointments.module';
 
 @Module({
+  imports: [PatientAppointmentsModule],
   controllers: [AppointmentsController],
   providers: [
     AppointmentsService,

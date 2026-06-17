@@ -19,6 +19,7 @@ const jwt_auth_guard_1 = require("../common/auth/jwt-auth.guard");
 const roles_decorator_1 = require("../common/auth/roles.decorator");
 const roles_guard_1 = require("../common/auth/roles.guard");
 const appointments_service_1 = require("./appointments.service");
+const create_appointment_dto_1 = require("../patient-appointments/dto/create-appointment.dto");
 function todayIso() {
     const now = new Date();
     const yyyy = now.getFullYear();
@@ -30,6 +31,12 @@ let AppointmentsController = class AppointmentsController {
     constructor(appointmentsService) {
         this.appointmentsService = appointmentsService;
     }
+    create(user, body) {
+        return this.appointmentsService.createInternal(user.tenantId, body);
+    }
+    availability(user, serviceId, date) {
+        return this.appointmentsService.availability(user.tenantId, serviceId, date);
+    }
     list(user, date) {
         return this.appointmentsService.listByDate(date ?? todayIso(), user.tenantId);
     }
@@ -38,6 +45,23 @@ let AppointmentsController = class AppointmentsController {
     }
 };
 exports.AppointmentsController = AppointmentsController;
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, create_appointment_dto_1.CreateAppointmentDto]),
+    __metadata("design:returntype", void 0)
+], AppointmentsController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)('availability'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('serviceId')),
+    __param(2, (0, common_1.Query)('date')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", void 0)
+], AppointmentsController.prototype, "availability", null);
 __decorate([
     (0, common_1.Get)(),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),

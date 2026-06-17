@@ -1,10 +1,11 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../common/auth/current-user.decorator';
 import { JwtPayload } from '../common/auth/jwt-payload.type';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { Roles } from '../common/auth/roles.decorator';
 import { RolesGuard } from '../common/auth/roles.guard';
 import { AppointmentsService } from './appointments.service';
+import { CreateAppointmentDto } from '../patient-appointments/dto/create-appointment.dto';
 
 function todayIso() {
   const now = new Date();
@@ -19,6 +20,20 @@ function todayIso() {
 @Roles('MASTER', 'ADMIN', 'DENTISTA', 'RECEPCIONISTA')
 export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
+
+  @Post()
+  create(@CurrentUser() user: JwtPayload, @Body() body: CreateAppointmentDto) {
+    return this.appointmentsService.createInternal(user.tenantId, body);
+  }
+
+  @Get('availability')
+  availability(
+    @CurrentUser() user: JwtPayload,
+    @Query('serviceId') serviceId: string,
+    @Query('date') date: string,
+  ) {
+    return this.appointmentsService.availability(user.tenantId, serviceId, date);
+  }
 
   @Get()
   list(@CurrentUser() user: JwtPayload, @Query('date') date?: string) {

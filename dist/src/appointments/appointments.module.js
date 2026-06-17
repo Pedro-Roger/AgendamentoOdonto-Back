@@ -13,11 +13,13 @@ const appointments_controller_1 = require("./appointments.controller");
 const appointments_service_1 = require("./appointments.service");
 const appointments_repository_1 = require("./repositories/appointments.repository");
 const appointments_repository_interface_1 = require("./repositories/appointments.repository.interface");
+const patient_appointments_module_1 = require("../patient-appointments/patient-appointments.module");
 let AppointmentsModule = class AppointmentsModule {
 };
 exports.AppointmentsModule = AppointmentsModule;
 exports.AppointmentsModule = AppointmentsModule = __decorate([
     (0, common_1.Module)({
+        imports: [patient_appointments_module_1.PatientAppointmentsModule],
         controllers: [appointments_controller_1.AppointmentsController],
         providers: [
             appointments_service_1.AppointmentsService,

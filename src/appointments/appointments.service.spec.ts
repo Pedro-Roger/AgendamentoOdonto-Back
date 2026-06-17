@@ -8,8 +8,13 @@ const mockRepo = {
   findByDateRange: jest.fn(),
 };
 
+const mockPatientAppointmentsService = {
+  createAppointment: jest.fn(),
+  getAvailableSchedules: jest.fn(),
+};
+
 function makeService() {
-  return new AppointmentsService(mockRepo as any);
+  return new AppointmentsService(mockRepo as any, mockPatientAppointmentsService as any);
 }
 
 describe('AppointmentsService — AGD-001 week range', () => {

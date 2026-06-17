@@ -15,9 +15,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppointmentsService = void 0;
 const common_1 = require("@nestjs/common");
 const appointments_repository_interface_1 = require("./repositories/appointments.repository.interface");
+const patient_appointments_service_1 = require("../patient-appointments/patient-appointments.service");
 let AppointmentsService = class AppointmentsService {
-    constructor(appointmentsRepository) {
+    constructor(appointmentsRepository, patientAppointmentsService) {
         this.appointmentsRepository = appointmentsRepository;
+        this.patientAppointmentsService = patientAppointmentsService;
+    }
+    createInternal(tenantId, payload) {
+        return this.patientAppointmentsService.createAppointment(tenantId, payload, 'INTERNAL');
+    }
+    availability(tenantId, serviceId, date) {
+        return this.patientAppointmentsService.getAvailableSchedules(tenantId, serviceId, date);
     }
     async findByDateRange(from, to, tenantId) {
         const fromDate = new Date(from);
@@ -50,6 +58,6 @@ exports.AppointmentsService = AppointmentsService;
 exports.AppointmentsService = AppointmentsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)(appointments_repository_interface_1.APPOINTMENTS_REPOSITORY)),
-    __metadata("design:paramtypes", [Object])
+    __metadata("design:paramtypes", [Object, patient_appointments_service_1.PatientAppointmentsService])
 ], AppointmentsService);
 //# sourceMappingURL=appointments.service.js.map

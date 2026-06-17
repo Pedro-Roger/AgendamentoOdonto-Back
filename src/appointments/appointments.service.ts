@@ -3,13 +3,24 @@ import {
   APPOINTMENTS_REPOSITORY,
   IAppointmentsRepository,
 } from './repositories/appointments.repository.interface';
+import { PatientAppointmentsService } from '../patient-appointments/patient-appointments.service';
+import { CreateAppointmentDto } from '../patient-appointments/dto/create-appointment.dto';
 
 @Injectable()
 export class AppointmentsService {
   constructor(
     @Inject(APPOINTMENTS_REPOSITORY)
     private readonly appointmentsRepository: IAppointmentsRepository,
+    private readonly patientAppointmentsService: PatientAppointmentsService,
   ) {}
+
+  createInternal(tenantId: string, payload: CreateAppointmentDto) {
+    return this.patientAppointmentsService.createAppointment(tenantId, payload, 'INTERNAL');
+  }
+
+  availability(tenantId: string, serviceId: string, date: string) {
+    return this.patientAppointmentsService.getAvailableSchedules(tenantId, serviceId, date);
+  }
 
   async findByDateRange(from: string, to: string, tenantId: string) {
     const fromDate = new Date(from);
