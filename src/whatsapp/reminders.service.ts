@@ -24,10 +24,6 @@ export class RemindersService {
       return;
     }
 
-    const config = await this.configRepo.findFirst();
-    const clinicName = config?.clinicName ?? 'Clínica';
-    const clinicAddress = config?.clinicAddress ?? '';
-
     const tomorrow = this.tomorrowIso();
     const appointments = await this.prisma.appointment.findMany({
       where: { date: tomorrow, reminder: null },
@@ -37,9 +33,20 @@ export class RemindersService {
     this.logger.log(`Lembretes: ${appointments.length} consultas amanhã (${tomorrow})`);
 
     const baseUrl = process.env.APP_URL ?? 'https://app.sorriso.com.br';
+    const configByTenant = new Map<string, { clinicName: string; clinicAddress: string }>();
 
     for (const appt of appointments) {
       if (!appt.patient.phone) continue;
+
+      let config = configByTenant.get(appt.tenantId);
+      if (!config) {
+        const found = await this.configRepo.findFirst(appt.tenantId);
+        config = {
+          clinicName: found?.clinicName ?? 'Clínica',
+          clinicAddress: found?.clinicAddress ?? '',
+        };
+        configByTenant.set(appt.tenantId, config);
+      }
 
       const token = crypto.randomBytes(20).toString('hex');
       const message = this.whatsApp.buildReminderMessage({
@@ -47,8 +54,8 @@ export class RemindersService {
         serviceName: appt.service.name,
         date: appt.date,
         time: appt.time,
-        clinicName,
-        clinicAddress,
+        clinicName: config.clinicName,
+        clinicAddress: config.clinicAddress,
         confirmationToken: token,
         baseUrl,
       });

@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
+import { CurrentUser } from '../common/auth/current-user.decorator';
+import { JwtPayload } from '../common/auth/jwt-payload.type';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { RolesGuard } from '../common/auth/roles.guard';
 import { Roles } from '../common/auth/roles.decorator';
@@ -35,19 +37,22 @@ export class WhatsAppConfigController {
   }
 
   @Get('config')
-  getConfig() {
-    return this.configRepo.findFirst();
+  getConfig(@CurrentUser() user: JwtPayload) {
+    return this.configRepo.findFirst(user.tenantId);
   }
 
   @Post('config')
-  saveConfig(@Body() body: SaveWhatsAppConfigDto) {
-    return this.configRepo.upsert({
-      instanceId: '',
-      token: '',
-      clinicName: body.clinicName,
-      clinicAddress: body.clinicAddress,
-      isActive: true,
-    });
+  saveConfig(@CurrentUser() user: JwtPayload, @Body() body: SaveWhatsAppConfigDto) {
+    return this.configRepo.upsert(
+      {
+        instanceId: '',
+        token: '',
+        clinicName: body.clinicName,
+        clinicAddress: body.clinicAddress,
+        isActive: true,
+      },
+      user.tenantId,
+    );
   }
 
   @Delete('session')

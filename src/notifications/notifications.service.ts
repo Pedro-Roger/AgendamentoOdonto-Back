@@ -6,37 +6,38 @@ import * as crypto from 'crypto';
 export class NotificationsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(data: { type: string; title: string; message: string; data?: any }) {
+  create(data: { type: string; title: string; message: string; data?: any; tenantId: string }) {
     return this.prisma.notification.create({
       data: { id: crypto.randomBytes(12).toString('hex'), ...data },
     });
   }
 
-  listUnread() {
+  listUnread(tenantId: string) {
     return this.prisma.notification.findMany({
-      where: { readAt: null },
+      where: { readAt: null, tenantId },
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
   }
 
-  listRecent() {
+  listRecent(tenantId: string) {
     return this.prisma.notification.findMany({
+      where: { tenantId },
       orderBy: { createdAt: 'desc' },
       take: 50,
     });
   }
 
-  async markAsRead(id: string) {
-    return this.prisma.notification.update({
-      where: { id },
+  async markAsRead(id: string, tenantId: string) {
+    return this.prisma.notification.updateMany({
+      where: { id, tenantId },
       data: { readAt: new Date() },
     });
   }
 
-  async markAllAsRead() {
+  async markAllAsRead(tenantId: string) {
     return this.prisma.notification.updateMany({
-      where: { readAt: null },
+      where: { readAt: null, tenantId },
       data: { readAt: new Date() },
     });
   }
