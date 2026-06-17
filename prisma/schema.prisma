@@ -21,6 +21,10 @@ model Service {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   appointments    Appointment[]
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
 }
 model Schedule {
   id        String   @id @default(cuid())
@@ -28,20 +32,33 @@ model Schedule {
   startTime String
   endTime   String
   createdAt DateTime @default(now())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
 }
 model FormSetting {
   id        String   @id @default(cuid())
   fields    Json
   createdAt DateTime @default(now())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
 }
 model Patient {
   id             String          @id @default(cuid())
   name           String
-  cpf            String          @unique
+  cpf            String
   email          String
   phone          String
   appointments   Appointment[]
   medicalRecords MedicalRecord[]
+  tenantId       String
+  tenant         Tenant          @relation(fields: [tenantId], references: [id])
+
+  @@unique([cpf, tenantId])
+  @@index([tenantId])
 }
 model Appointment {
   id               String   @id @default(cuid())
@@ -52,10 +69,16 @@ model Appointment {
   reason           String   @default("")
   anamnesisAnswers Json
   createdAt        DateTime @default(now())
+  source           String   @default("INTERNAL")
+  apiKeyId         String?
   patient       Patient         @relation(fields: [patientId], references: [id])
   service       Service         @relation(fields: [serviceId], references: [id])
   medicalRecords MedicalRecord[]
   reminder       AppointmentReminder?
+  tenantId      String
+  tenant        Tenant          @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
 }
 model MedicalRecord {
   id            String   @id @default(cuid())
@@ -98,6 +121,29 @@ model Tenant {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   users          User[]
+  patients        Patient[]
+  appointments    Appointment[]
+  schedules       Schedule[]
+  services        Service[]
+  formSettings    FormSetting[]
+  whatsappConfigs WhatsAppConfig[]
+  notifications   Notification[]
+  apiKeys         ApiKey[]
+}
+
+model ApiKey {
+  id             String    @id @default(cuid())
+  tenantId       String
+  name           String
+  keyHash        String    @unique
+  prefix         String
+  allowedOrigins String[]  @default([])
+  lastUsedAt     DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  tenant         Tenant    @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
 }
 
 model User {
@@ -121,6 +167,10 @@ model Notification {
   data      Json?
   readAt    DateTime?
   createdAt DateTime  @default(now())
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
 }
 
 model WhatsAppConfig {
@@ -132,6 +182,10 @@ model WhatsAppConfig {
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  tenantId       String
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
 }
 
 model AppointmentReminder {
