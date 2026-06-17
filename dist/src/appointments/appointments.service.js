@@ -19,7 +19,7 @@ let AppointmentsService = class AppointmentsService {
     constructor(appointmentsRepository) {
         this.appointmentsRepository = appointmentsRepository;
     }
-    async findByDateRange(from, to) {
+    async findByDateRange(from, to, tenantId) {
         const fromDate = new Date(from);
         const toDate = new Date(to);
         if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
@@ -33,10 +33,10 @@ let AppointmentsService = class AppointmentsService {
         if (diffDays > 31) {
             throw new common_1.BadRequestException('Intervalo máximo de 31 dias');
         }
-        return this.appointmentsRepository.findByDateRange(from, to);
+        return this.appointmentsRepository.findByDateRange(from, to, tenantId);
     }
-    async listByDate(date) {
-        const appointments = await this.appointmentsRepository.findByDateWithRelations(date);
+    async listByDate(date, tenantId) {
+        const appointments = await this.appointmentsRepository.findByDateWithRelations(date, tenantId);
         return appointments.map((a) => ({
             id: a.id,
             date: a.date,

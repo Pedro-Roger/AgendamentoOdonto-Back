@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppointmentsController = void 0;
 const common_1 = require("@nestjs/common");
+const current_user_decorator_1 = require("../common/auth/current-user.decorator");
 const jwt_auth_guard_1 = require("../common/auth/jwt-auth.guard");
 const roles_decorator_1 = require("../common/auth/roles.decorator");
 const roles_guard_1 = require("../common/auth/roles.guard");
@@ -29,27 +30,29 @@ let AppointmentsController = class AppointmentsController {
     constructor(appointmentsService) {
         this.appointmentsService = appointmentsService;
     }
-    list(date) {
-        return this.appointmentsService.listByDate(date ?? todayIso());
+    list(user, date) {
+        return this.appointmentsService.listByDate(date ?? todayIso(), user.tenantId);
     }
-    findByWeek(from, to) {
-        return this.appointmentsService.findByDateRange(from, to);
+    findByWeek(user, from, to) {
+        return this.appointmentsService.findByDateRange(from, to, user.tenantId);
     }
 };
 exports.AppointmentsController = AppointmentsController;
 __decorate([
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)('date')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('date')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], AppointmentsController.prototype, "list", null);
 __decorate([
     (0, common_1.Get)('week'),
-    __param(0, (0, common_1.Query)('from')),
-    __param(1, (0, common_1.Query)('to')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('from')),
+    __param(2, (0, common_1.Query)('to')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", void 0)
 ], AppointmentsController.prototype, "findByWeek", null);
 exports.AppointmentsController = AppointmentsController = __decorate([

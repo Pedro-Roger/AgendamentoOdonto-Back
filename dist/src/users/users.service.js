@@ -21,7 +21,7 @@ let UsersService = class UsersService {
     constructor(usersRepository) {
         this.usersRepository = usersRepository;
     }
-    async create(data) {
+    async create(data, tenantId) {
         if (!data.name?.trim() || !data.email?.trim() || !data.password) {
             throw new common_1.BadRequestException('Nome, email e senha são obrigatórios');
         }
@@ -37,6 +37,7 @@ let UsersService = class UsersService {
             email: data.email.trim().toLowerCase(),
             password: (0, bcryptjs_1.hashSync)(data.password, 10),
             role: data.role ?? user_role_enum_1.UserRole.ADMIN,
+            tenantId,
         });
         const { password: _, ...safe } = user;
         return safe;

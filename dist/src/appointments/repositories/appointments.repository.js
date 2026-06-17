@@ -16,9 +16,9 @@ let AppointmentsRepository = class AppointmentsRepository {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    findByDateWithRelations(date) {
+    findByDateWithRelations(date, tenantId) {
         return this.prisma.appointment.findMany({
-            where: { date },
+            where: { tenantId, date },
             orderBy: { time: 'asc' },
             include: {
                 patient: { select: { id: true, name: true, cpf: true, email: true, phone: true } },
@@ -26,9 +26,9 @@ let AppointmentsRepository = class AppointmentsRepository {
             },
         });
     }
-    findByDateRange(from, to) {
+    findByDateRange(from, to, tenantId) {
         return this.prisma.appointment.findMany({
-            where: { date: { gte: from, lte: to } },
+            where: { tenantId, date: { gte: from, lte: to } },
             orderBy: [{ date: 'asc' }, { time: 'asc' }],
             include: {
                 patient: { select: { id: true, name: true, cpf: true, email: true, phone: true } },
@@ -36,12 +36,12 @@ let AppointmentsRepository = class AppointmentsRepository {
             },
         });
     }
-    findByServiceAndDate(serviceId, date) {
-        return this.prisma.appointment.findMany({ where: { serviceId, date } });
+    findByServiceAndDate(serviceId, date, tenantId) {
+        return this.prisma.appointment.findMany({ where: { tenantId, serviceId, date } });
     }
-    findByPatient(patientId) {
+    findByPatient(patientId, tenantId) {
         return this.prisma.appointment.findMany({
-            where: { patientId },
+            where: { tenantId, patientId },
             orderBy: { date: 'desc' },
         });
     }

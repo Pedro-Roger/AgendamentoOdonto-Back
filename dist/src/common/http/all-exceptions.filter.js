@@ -34,15 +34,25 @@ let AllExceptionsFilter = AllExceptionsFilter_1 = class AllExceptionsFilter {
                 safeMessage = res;
             }
         }
-        if (status >= 500) {
+        if (status >= 400) {
             const errorMessage = exception instanceof Error ? exception.message : String(exception);
             const stackTrace = exception instanceof Error ? (exception.stack ?? errorMessage) : String(exception);
             const user = request.user;
-            this.logger.error(`[${request.method}] ${request.url} -> ${status}`, stackTrace);
+            const is5xx = status >= 500;
+            if (is5xx) {
+                this.logger.error(`[${request.method}] ${request.url} -> ${status}`, stackTrace);
+            }
+            else {
+                this.logger.warn(`[${request.method}] ${request.url} -> ${status}: ${errorMessage}`);
+            }
+            const emoji = is5xx ? '🔴' : '🟡';
+            const levelLabel = is5xx ? 'ERRO' : 'AVISO';
             this.discord.sendAlert({
-                level: 'error',
-                title: `🚨 Erro ${status} — ${request.method} ${request.url}`,
-                description: `**Mensagem:** ${errorMessage}\n\`\`\`${stackTrace.slice(0, 1500)}\`\`\``,
+                level: is5xx ? 'error' : 'warn',
+                title: `${emoji} ${status} ${levelLabel} — ${request.method} ${request.url}`,
+                description: is5xx
+                    ? `**Mensagem:** ${errorMessage}\n\`\`\`${stackTrace.slice(0, 1500)}\`\`\``
+                    : `**Mensagem:** ${errorMessage}`,
                 fields: [
                     {
                         name: '📍 Endpoint',
@@ -57,18 +67,18 @@ let AllExceptionsFilter = AllExceptionsFilter_1 = class AllExceptionsFilter {
                         inline: true,
                     },
                     {
-                        name: '🔴 Status',
+                        name: `${emoji} Status`,
                         value: `${status}`,
                         inline: true,
                     },
                     {
-                        name: '💬 Erro',
-                        value: `\`${errorMessage.slice(0, 500)}\``,
+                        name: '💬 Mensagem',
+                        value: `\`${String(Array.isArray(safeMessage) ? safeMessage.join(', ') : safeMessage).slice(0, 500)}\``,
                         inline: false,
                     },
                 ],
             }).catch(() => null);
-            if (isProd)
+            if (is5xx && isProd)
                 safeMessage = 'Internal server error';
         }
         response.status(status).json({

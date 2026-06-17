@@ -62,8 +62,8 @@ let MedicalRecordsService = class MedicalRecordsService {
     findByPatient(patientId) {
         return this.medicalRecordsRepository.findLatestByPatient(patientId);
     }
-    listAllByPatient(patientId) {
-        return this.medicalRecordsRepository.findByPatient(patientId);
+    listAllByPatient(patientId, tenantId) {
+        return this.medicalRecordsRepository.findByPatient(patientId, tenantId);
     }
     async updateById(id, content) {
         const existing = await this.medicalRecordsRepository.findById(id);

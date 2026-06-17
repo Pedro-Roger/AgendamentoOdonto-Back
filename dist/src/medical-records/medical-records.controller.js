@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MedicalRecordsController = void 0;
 const common_1 = require("@nestjs/common");
+const current_user_decorator_1 = require("../common/auth/current-user.decorator");
 const jwt_auth_guard_1 = require("../common/auth/jwt-auth.guard");
 const roles_decorator_1 = require("../common/auth/roles.decorator");
 const roles_guard_1 = require("../common/auth/roles.guard");
@@ -42,8 +43,8 @@ let MedicalRecordsController = class MedicalRecordsController {
     findOne(id) {
         return this.medicalRecordsService.findOne(id);
     }
-    listAllByPatient(patientId) {
-        return this.medicalRecordsService.listAllByPatient(patientId);
+    listAllByPatient(user, patientId) {
+        return this.medicalRecordsService.listAllByPatient(patientId, user.tenantId);
     }
     createForPatient(patientId, body) {
         return this.medicalRecordsService.create(patientId, body.content ?? {});
@@ -90,9 +91,10 @@ __decorate([
 ], MedicalRecordsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Get)('patient/:patientId/history'),
-    __param(0, (0, common_1.Param)('patientId')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('patientId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], MedicalRecordsController.prototype, "listAllByPatient", null);
 __decorate([

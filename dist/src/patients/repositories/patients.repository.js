@@ -16,18 +16,17 @@ let PatientsRepository = class PatientsRepository {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    findAll(q) {
-        if (!q)
-            return this.prisma.patient.findMany();
-        return this.prisma.patient.findMany({
-            where: { OR: [{ name: { contains: q } }, { cpf: { contains: q } }] },
-        });
+    findAll(tenantId, q) {
+        const where = { tenantId };
+        if (q)
+            where.OR = [{ name: { contains: q } }, { cpf: { contains: q } }];
+        return this.prisma.patient.findMany({ where });
     }
-    findById(id) {
-        return this.prisma.patient.findUnique({ where: { id } });
+    findById(id, tenantId) {
+        return this.prisma.patient.findFirst({ where: { id, tenantId } });
     }
-    findByCpf(cpf) {
-        return this.prisma.patient.findUnique({ where: { cpf } });
+    findByCpfAndTenant(cpf, tenantId) {
+        return this.prisma.patient.findUnique({ where: { cpf_tenantId: { cpf, tenantId } } });
     }
     create(data) {
         return this.prisma.patient.create({ data });

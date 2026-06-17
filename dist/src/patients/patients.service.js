@@ -24,19 +24,19 @@ let PatientsService = class PatientsService {
         this.appointmentsRepository = appointmentsRepository;
         this.medicalRecordsRepository = medicalRecordsRepository;
     }
-    list(q) {
-        return this.patientsRepository.findAll(q);
+    list(tenantId, q) {
+        return this.patientsRepository.findAll(tenantId, q);
     }
-    async profile(id) {
-        const patient = await this.patientsRepository.findById(id);
+    async profile(id, tenantId) {
+        const patient = await this.patientsRepository.findById(id, tenantId);
         if (!patient)
             throw new common_1.NotFoundException('Paciente não encontrado');
         return patient;
     }
-    async timeline(id) {
+    async timeline(id, tenantId) {
         const [appointments, medicalRecords] = await Promise.all([
-            this.appointmentsRepository.findByPatient(id),
-            this.medicalRecordsRepository.findByPatient(id),
+            this.appointmentsRepository.findByPatient(id, tenantId),
+            this.medicalRecordsRepository.findByPatient(id, tenantId),
         ]);
         const appointmentEvents = appointments.map((a) => ({
             id: a.id,

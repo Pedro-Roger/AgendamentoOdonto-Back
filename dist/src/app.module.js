@@ -19,9 +19,13 @@ const medical_records_module_1 = require("./medical-records/medical-records.modu
 const signatures_module_1 = require("./signatures.module");
 const patients_module_1 = require("./patients/patients.module");
 const users_module_1 = require("./users/users.module");
+const tenants_module_1 = require("./tenants/tenants.module");
 const notifications_module_1 = require("./notifications/notifications.module");
 const whatsapp_module_1 = require("./whatsapp/whatsapp.module");
 const discord_module_1 = require("./common/discord/discord.module");
+const api_keys_module_1 = require("./api-keys/api-keys.module");
+const integrations_module_1 = require("./integrations/integrations.module");
+const dashboard_module_1 = require("./dashboard/dashboard.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -41,9 +45,13 @@ exports.AppModule = AppModule = __decorate([
             signatures_module_1.SignaturesModule,
             patients_module_1.PatientsModule,
             users_module_1.UsersModule,
+            tenants_module_1.TenantsModule,
             notifications_module_1.NotificationsModule,
             whatsapp_module_1.WhatsAppModule,
             discord_module_1.DiscordModule,
+            api_keys_module_1.ApiKeysModule,
+            integrations_module_1.IntegrationsModule,
+            dashboard_module_1.DashboardModule,
         ],
         providers: [
             { provide: core_1.APP_GUARD, useClass: throttler_1.ThrottlerGuard },

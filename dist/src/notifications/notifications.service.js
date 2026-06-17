@@ -55,28 +55,29 @@ let NotificationsService = class NotificationsService {
             data: { id: crypto.randomBytes(12).toString('hex'), ...data },
         });
     }
-    listUnread() {
+    listUnread(tenantId) {
         return this.prisma.notification.findMany({
-            where: { readAt: null },
+            where: { readAt: null, tenantId },
             orderBy: { createdAt: 'desc' },
             take: 50,
         });
     }
-    listRecent() {
+    listRecent(tenantId) {
         return this.prisma.notification.findMany({
+            where: { tenantId },
             orderBy: { createdAt: 'desc' },
             take: 50,
         });
     }
-    async markAsRead(id) {
-        return this.prisma.notification.update({
-            where: { id },
+    async markAsRead(id, tenantId) {
+        return this.prisma.notification.updateMany({
+            where: { id, tenantId },
             data: { readAt: new Date() },
         });
     }
-    async markAllAsRead() {
+    async markAllAsRead(tenantId) {
         return this.prisma.notification.updateMany({
-            where: { readAt: null },
+            where: { readAt: null, tenantId },
             data: { readAt: new Date() },
         });
     }

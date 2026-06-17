@@ -18,10 +18,12 @@ const jwt_1 = require("@nestjs/jwt");
 const bcryptjs_1 = require("bcryptjs");
 const users_repository_interface_1 = require("../users/repositories/users.repository.interface");
 const user_role_enum_1 = require("../common/enums/user-role.enum");
+const tenants_service_1 = require("../tenants/tenants.service");
 let AuthService = class AuthService {
-    constructor(usersRepository, jwtService) {
+    constructor(usersRepository, jwtService, tenantsService) {
         this.usersRepository = usersRepository;
         this.jwtService = jwtService;
+        this.tenantsService = tenantsService;
     }
     async login(email, password) {
         const user = await this.usersRepository.findByEmail(email);
@@ -40,6 +42,7 @@ let AuthService = class AuthService {
             sub: user.id,
             email: user.email,
             role: user.role,
+            tenantId: user.tenantId,
         });
         return {
             accessToken,
@@ -52,11 +55,13 @@ let AuthService = class AuthService {
         if (count > 0) {
             throw new common_1.BadRequestException('Bootstrap disabled: users already exist');
         }
+        const tenant = await this.tenantsService.create({ name: body.name, slug: body.name });
         const user = await this.usersRepository.create({
             name: body.name,
             email: body.email,
             password: (0, bcryptjs_1.hashSync)(body.password, 10),
             role: user_role_enum_1.UserRole.MASTER,
+            tenantId: tenant.id,
         });
         return { id: user.id, email: user.email, role: user.role };
     }
@@ -65,6 +70,7 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)(users_repository_interface_1.USERS_REPOSITORY)),
-    __metadata("design:paramtypes", [Object, jwt_1.JwtService])
+    __metadata("design:paramtypes", [Object, jwt_1.JwtService,
+        tenants_service_1.TenantsService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

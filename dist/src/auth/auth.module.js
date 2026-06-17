@@ -14,6 +14,7 @@ const auth_controller_1 = require("./auth.controller");
 const auth_service_1 = require("./auth.service");
 const users_repository_1 = require("../users/repositories/users.repository");
 const users_repository_interface_1 = require("../users/repositories/users.repository.interface");
+const tenants_module_1 = require("../tenants/tenants.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -25,6 +26,7 @@ exports.AuthModule = AuthModule = __decorate([
                 secret: process.env.JWT_SECRET,
                 signOptions: { expiresIn: (process.env.JWT_EXPIRES_IN ?? '1d') },
             }),
+            tenants_module_1.TenantsModule,
         ],
         controllers: [auth_controller_1.AuthController],
         providers: [

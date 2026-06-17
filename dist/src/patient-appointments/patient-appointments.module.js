@@ -20,13 +20,13 @@ const form_settings_repository_interface_1 = require("../clinic-config/repositor
 const appointments_repository_1 = require("../appointments/repositories/appointments.repository");
 const appointments_repository_interface_1 = require("../appointments/repositories/appointments.repository.interface");
 const notifications_module_1 = require("../notifications/notifications.module");
-const whatsapp_module_1 = require("../whatsapp/whatsapp.module");
+const tenants_module_1 = require("../tenants/tenants.module");
 let PatientAppointmentsModule = class PatientAppointmentsModule {
 };
 exports.PatientAppointmentsModule = PatientAppointmentsModule;
 exports.PatientAppointmentsModule = PatientAppointmentsModule = __decorate([
     (0, common_1.Module)({
-        imports: [notifications_module_1.NotificationsModule, whatsapp_module_1.WhatsAppModule],
+        imports: [notifications_module_1.NotificationsModule, tenants_module_1.TenantsModule],
         controllers: [patient_appointments_controller_1.PatientAppointmentsController],
         providers: [
             patient_appointments_service_1.PatientAppointmentsService,
@@ -36,6 +36,7 @@ exports.PatientAppointmentsModule = PatientAppointmentsModule = __decorate([
             { provide: form_settings_repository_interface_1.FORM_SETTINGS_REPOSITORY, useClass: form_settings_repository_1.FormSettingsRepository },
             { provide: appointments_repository_interface_1.APPOINTMENTS_REPOSITORY, useClass: appointments_repository_1.AppointmentsRepository },
         ],
+        exports: [patient_appointments_service_1.PatientAppointmentsService],
     })
 ], PatientAppointmentsModule);
 //# sourceMappingURL=patient-appointments.module.js.map

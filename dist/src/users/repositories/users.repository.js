@@ -18,6 +18,7 @@ const SAFE_SELECT = {
     email: true,
     role: true,
     isActive: true,
+    tenantId: true,
     createdAt: true,
     updatedAt: true,
 };

@@ -25,9 +25,9 @@ let MedicalRecordsRepository = class MedicalRecordsRepository {
     findById(id) {
         return this.prisma.medicalRecord.findUnique({ where: { id } });
     }
-    findByPatient(patientId) {
+    findByPatient(patientId, tenantId) {
         return this.prisma.medicalRecord.findMany({
-            where: { patientId },
+            where: { patientId, patient: { tenantId } },
             orderBy: { updatedAt: 'desc' },
         });
     }

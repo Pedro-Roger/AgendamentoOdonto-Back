@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClinicConfigController = void 0;
 const common_1 = require("@nestjs/common");
+const current_user_decorator_1 = require("../common/auth/current-user.decorator");
 const jwt_auth_guard_1 = require("../common/auth/jwt-auth.guard");
 const roles_guard_1 = require("../common/auth/roles.guard");
 const roles_decorator_1 = require("../common/auth/roles.decorator");
@@ -26,92 +27,100 @@ let ClinicConfigController = class ClinicConfigController {
     constructor(clinicConfigService) {
         this.clinicConfigService = clinicConfigService;
     }
-    createService(body) {
-        return this.clinicConfigService.createService(body);
+    createService(user, body) {
+        return this.clinicConfigService.createService(body, user.tenantId);
     }
-    listServices() {
-        return this.clinicConfigService.listActiveServices();
+    listServices(user) {
+        return this.clinicConfigService.listActiveServices(user.tenantId);
     }
-    updateService(id, body) {
-        return this.clinicConfigService.updateService(id, body);
+    updateService(user, id, body) {
+        return this.clinicConfigService.updateService(id, body, user.tenantId);
     }
-    createSchedule(body) {
-        return this.clinicConfigService.createSchedule(body);
+    createSchedule(user, body) {
+        return this.clinicConfigService.createSchedule(body, user.tenantId);
     }
-    listSchedules() {
-        return this.clinicConfigService.listSchedules();
+    listSchedules(user) {
+        return this.clinicConfigService.listSchedules(user.tenantId);
     }
-    createFormSettings(body) {
-        return this.clinicConfigService.createFormSettings(body.fields);
+    createFormSettings(user, body) {
+        return this.clinicConfigService.createFormSettings(body.fields, user.tenantId);
     }
-    getFormSettings() {
-        return this.clinicConfigService.getFormSettings();
+    getFormSettings(user) {
+        return this.clinicConfigService.getFormSettings(user.tenantId);
     }
-    replaceSchedules(body) {
-        return this.clinicConfigService.replaceSchedules(body);
+    replaceSchedules(user, body) {
+        return this.clinicConfigService.replaceSchedules(body, user.tenantId);
     }
 };
 exports.ClinicConfigController = ClinicConfigController;
 __decorate([
     (0, common_1.Post)('services'),
     (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_service_dto_1.CreateServiceDto]),
+    __metadata("design:paramtypes", [Object, create_service_dto_1.CreateServiceDto]),
     __metadata("design:returntype", void 0)
 ], ClinicConfigController.prototype, "createService", null);
 __decorate([
     (0, common_1.Get)('services'),
     (0, roles_decorator_1.Roles)('MASTER', 'ADMIN', 'DENTISTA', 'RECEPCIONISTA'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], ClinicConfigController.prototype, "listServices", null);
 __decorate([
     (0, common_1.Put)('services/:id'),
     (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_service_dto_1.UpdateServiceDto]),
+    __metadata("design:paramtypes", [Object, String, update_service_dto_1.UpdateServiceDto]),
     __metadata("design:returntype", void 0)
 ], ClinicConfigController.prototype, "updateService", null);
 __decorate([
     (0, common_1.Post)('schedules'),
     (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_schedule_dto_1.CreateScheduleDto]),
+    __metadata("design:paramtypes", [Object, create_schedule_dto_1.CreateScheduleDto]),
     __metadata("design:returntype", void 0)
 ], ClinicConfigController.prototype, "createSchedule", null);
 __decorate([
     (0, common_1.Get)('schedules'),
     (0, roles_decorator_1.Roles)('MASTER', 'ADMIN', 'DENTISTA', 'RECEPCIONISTA'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], ClinicConfigController.prototype, "listSchedules", null);
 __decorate([
     (0, common_1.Post)('form-settings'),
     (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_form_settings_dto_1.CreateFormSettingsDto]),
+    __metadata("design:paramtypes", [Object, create_form_settings_dto_1.CreateFormSettingsDto]),
     __metadata("design:returntype", void 0)
 ], ClinicConfigController.prototype, "createFormSettings", null);
 __decorate([
     (0, common_1.Get)('form-settings'),
     (0, roles_decorator_1.Roles)('MASTER', 'ADMIN', 'DENTISTA'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], ClinicConfigController.prototype, "getFormSettings", null);
 __decorate([
     (0, common_1.Put)('schedules'),
     (0, roles_decorator_1.Roles)('MASTER', 'ADMIN'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Array]),
+    __metadata("design:paramtypes", [Object, Array]),
     __metadata("design:returntype", void 0)
 ], ClinicConfigController.prototype, "replaceSchedules", null);
 exports.ClinicConfigController = ClinicConfigController = __decorate([

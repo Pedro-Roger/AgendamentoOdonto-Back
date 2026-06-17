@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WhatsAppConfigController = void 0;
 const common_1 = require("@nestjs/common");
+const current_user_decorator_1 = require("../common/auth/current-user.decorator");
 const jwt_auth_guard_1 = require("../common/auth/jwt-auth.guard");
 const roles_guard_1 = require("../common/auth/roles.guard");
 const roles_decorator_1 = require("../common/auth/roles.decorator");
@@ -49,17 +50,17 @@ let WhatsAppConfigController = class WhatsAppConfigController {
             qr: this.baileys.getQr(),
         };
     }
-    getConfig() {
-        return this.configRepo.findFirst();
+    getConfig(user) {
+        return this.configRepo.findFirst(user.tenantId);
     }
-    saveConfig(body) {
+    saveConfig(user, body) {
         return this.configRepo.upsert({
             instanceId: '',
             token: '',
             clinicName: body.clinicName,
             clinicAddress: body.clinicAddress,
             isActive: true,
-        });
+        }, user.tenantId);
     }
     async resetSession() {
         await this.baileys.disconnect();
@@ -79,15 +80,17 @@ __decorate([
 ], WhatsAppConfigController.prototype, "getStatus", null);
 __decorate([
     (0, common_1.Get)('config'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], WhatsAppConfigController.prototype, "getConfig", null);
 __decorate([
     (0, common_1.Post)('config'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [SaveWhatsAppConfigDto]),
+    __metadata("design:paramtypes", [Object, SaveWhatsAppConfigDto]),
     __metadata("design:returntype", void 0)
 ], WhatsAppConfigController.prototype, "saveConfig", null);
 __decorate([

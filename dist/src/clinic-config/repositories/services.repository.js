@@ -16,14 +16,17 @@ let ServicesRepository = class ServicesRepository {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    create(data) {
-        return this.prisma.service.create({ data });
+    create(data, tenantId) {
+        return this.prisma.service.create({ data: { ...data, tenantId } });
     }
-    findActive() {
-        return this.prisma.service.findMany({ where: { isActive: true } });
+    findActive(tenantId) {
+        return this.prisma.service.findMany({ where: { isActive: true, tenantId } });
     }
-    update(id, data) {
-        return this.prisma.service.update({ where: { id }, data });
+    async update(id, data, tenantId) {
+        const result = await this.prisma.service.updateMany({ where: { id, tenantId }, data });
+        if (result.count === 0)
+            throw new common_1.NotFoundException('Serviço não encontrado');
+        return this.prisma.service.findFirstOrThrow({ where: { id, tenantId } });
     }
 };
 exports.ServicesRepository = ServicesRepository;

@@ -49,20 +49,23 @@ let WhatsAppConfigRepository = class WhatsAppConfigRepository {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    findActive() {
-        return this.prisma.whatsAppConfig.findFirst({ where: { isActive: true } });
+    findActive(tenantId) {
+        return this.prisma.whatsAppConfig.findFirst({ where: { isActive: true, tenantId } });
     }
-    findFirst() {
-        return this.prisma.whatsAppConfig.findFirst({ orderBy: { createdAt: 'desc' } });
+    findFirst(tenantId) {
+        return this.prisma.whatsAppConfig.findFirst({
+            where: { tenantId },
+            orderBy: { createdAt: 'desc' },
+        });
     }
-    async upsert(data) {
-        const existing = await this.findFirst();
+    async upsert(data, tenantId) {
+        const existing = await this.findFirst(tenantId);
         if (existing) {
             return this.prisma.whatsAppConfig.update({ where: { id: existing.id }, data });
         }
         const { randomBytes } = await Promise.resolve().then(() => __importStar(require('crypto')));
         return this.prisma.whatsAppConfig.create({
-            data: { id: randomBytes(12).toString('hex'), ...data },
+            data: { id: randomBytes(12).toString('hex'), ...data, tenantId },
         });
     }
 };

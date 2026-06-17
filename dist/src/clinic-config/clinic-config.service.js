@@ -23,29 +23,29 @@ let ClinicConfigService = class ClinicConfigService {
         this.schedulesRepository = schedulesRepository;
         this.formSettingsRepository = formSettingsRepository;
     }
-    createService(data) {
-        return this.servicesRepository.create(data);
+    createService(data, tenantId) {
+        return this.servicesRepository.create(data, tenantId);
     }
-    listActiveServices() {
-        return this.servicesRepository.findActive();
+    listActiveServices(tenantId) {
+        return this.servicesRepository.findActive(tenantId);
     }
-    updateService(id, data) {
-        return this.servicesRepository.update(id, data);
+    updateService(id, data, tenantId) {
+        return this.servicesRepository.update(id, data, tenantId);
     }
-    createSchedule(data) {
-        return this.schedulesRepository.create(data);
+    createSchedule(data, tenantId) {
+        return this.schedulesRepository.create(data, tenantId);
     }
-    listSchedules() {
-        return this.schedulesRepository.findAll();
+    listSchedules(tenantId) {
+        return this.schedulesRepository.findAll(tenantId);
     }
-    replaceSchedules(schedules) {
-        return this.schedulesRepository.replaceAll(schedules);
+    replaceSchedules(schedules, tenantId) {
+        return this.schedulesRepository.replaceAll(schedules, tenantId);
     }
-    createFormSettings(fields) {
-        return this.formSettingsRepository.create(fields);
+    createFormSettings(fields, tenantId) {
+        return this.formSettingsRepository.create(fields, tenantId);
     }
-    getFormSettings() {
-        return this.formSettingsRepository.findLatest();
+    getFormSettings(tenantId) {
+        return this.formSettingsRepository.findLatest(tenantId);
     }
 };
 exports.ClinicConfigService = ClinicConfigService;

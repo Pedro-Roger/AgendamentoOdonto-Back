@@ -16,22 +16,22 @@ let SchedulesRepository = class SchedulesRepository {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    create(data) {
-        return this.prisma.schedule.create({ data });
+    create(data, tenantId) {
+        return this.prisma.schedule.create({ data: { ...data, tenantId } });
     }
-    findAll() {
-        return this.prisma.schedule.findMany({ orderBy: { weekDay: 'asc' } });
+    findAll(tenantId) {
+        return this.prisma.schedule.findMany({ where: { tenantId }, orderBy: { weekDay: 'asc' } });
     }
-    findByWeekDay(weekDay) {
-        return this.prisma.schedule.findMany({ where: { weekDay } });
+    findByWeekDay(weekDay, tenantId) {
+        return this.prisma.schedule.findMany({ where: { weekDay, tenantId } });
     }
-    async replaceAll(schedules) {
+    async replaceAll(schedules, tenantId) {
         return this.prisma.$transaction(async (tx) => {
-            await tx.schedule.deleteMany({});
+            await tx.schedule.deleteMany({ where: { tenantId } });
             if (schedules.length === 0)
                 return [];
-            await tx.schedule.createMany({ data: schedules });
-            return tx.schedule.findMany({ orderBy: { weekDay: 'asc' } });
+            await tx.schedule.createMany({ data: schedules.map((s) => ({ ...s, tenantId })) });
+            return tx.schedule.findMany({ where: { tenantId }, orderBy: { weekDay: 'asc' } });
         });
     }
 };

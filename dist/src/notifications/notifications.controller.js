@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationsController = void 0;
 const common_1 = require("@nestjs/common");
+const current_user_decorator_1 = require("../common/auth/current-user.decorator");
 const jwt_auth_guard_1 = require("../common/auth/jwt-auth.guard");
 const roles_guard_1 = require("../common/auth/roles.guard");
 const roles_decorator_1 = require("../common/auth/roles.decorator");
@@ -22,43 +23,47 @@ let NotificationsController = class NotificationsController {
     constructor(notificationsService) {
         this.notificationsService = notificationsService;
     }
-    list() {
-        return this.notificationsService.listRecent();
+    list(user) {
+        return this.notificationsService.listRecent(user.tenantId);
     }
-    unread() {
-        return this.notificationsService.listUnread();
+    unread(user) {
+        return this.notificationsService.listUnread(user.tenantId);
     }
-    markRead(id) {
-        return this.notificationsService.markAsRead(id);
+    markRead(user, id) {
+        return this.notificationsService.markAsRead(id, user.tenantId);
     }
-    markAllRead() {
-        return this.notificationsService.markAllAsRead();
+    markAllRead(user) {
+        return this.notificationsService.markAllAsRead(user.tenantId);
     }
 };
 exports.NotificationsController = NotificationsController;
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], NotificationsController.prototype, "list", null);
 __decorate([
     (0, common_1.Get)('unread'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], NotificationsController.prototype, "unread", null);
 __decorate([
     (0, common_1.Patch)(':id/read'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], NotificationsController.prototype, "markRead", null);
 __decorate([
     (0, common_1.Patch)('read-all'),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], NotificationsController.prototype, "markAllRead", null);
 exports.NotificationsController = NotificationsController = __decorate([

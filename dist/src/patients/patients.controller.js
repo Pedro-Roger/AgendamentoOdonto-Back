@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PatientsController = void 0;
 const common_1 = require("@nestjs/common");
+const current_user_decorator_1 = require("../common/auth/current-user.decorator");
 const jwt_auth_guard_1 = require("../common/auth/jwt-auth.guard");
 const roles_decorator_1 = require("../common/auth/roles.decorator");
 const roles_guard_1 = require("../common/auth/roles.guard");
@@ -23,36 +24,39 @@ let PatientsController = class PatientsController {
     constructor(patientsService) {
         this.patientsService = patientsService;
     }
-    list(query) {
-        return this.patientsService.list(query.q);
+    list(user, query) {
+        return this.patientsService.list(user.tenantId, query.q);
     }
-    profile(id) {
-        return this.patientsService.profile(id);
+    profile(user, id) {
+        return this.patientsService.profile(id, user.tenantId);
     }
-    timeline(id) {
-        return this.patientsService.timeline(id);
+    timeline(user, id) {
+        return this.patientsService.timeline(id, user.tenantId);
     }
 };
 exports.PatientsController = PatientsController;
 __decorate([
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)()),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [search_patients_query_dto_1.SearchPatientsQueryDto]),
+    __metadata("design:paramtypes", [Object, search_patients_query_dto_1.SearchPatientsQueryDto]),
     __metadata("design:returntype", void 0)
 ], PatientsController.prototype, "list", null);
 __decorate([
     (0, common_1.Get)(':id/profile'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], PatientsController.prototype, "profile", null);
 __decorate([
     (0, common_1.Get)(':id/timeline'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], PatientsController.prototype, "timeline", null);
 exports.PatientsController = PatientsController = __decorate([

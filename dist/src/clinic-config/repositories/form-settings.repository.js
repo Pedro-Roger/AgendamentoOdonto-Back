@@ -16,13 +16,16 @@ let FormSettingsRepository = class FormSettingsRepository {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    create(fields) {
+    create(fields, tenantId) {
         return this.prisma.formSetting.create({
-            data: { fields: fields },
+            data: { fields: fields, tenantId },
         });
     }
-    findLatest() {
-        return this.prisma.formSetting.findFirst({ orderBy: { createdAt: 'desc' } });
+    findLatest(tenantId) {
+        return this.prisma.formSetting.findFirst({
+            where: { tenantId },
+            orderBy: { createdAt: 'desc' },
+        });
     }
 };
 exports.FormSettingsRepository = FormSettingsRepository;

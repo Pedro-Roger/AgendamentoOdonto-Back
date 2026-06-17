@@ -25,8 +25,8 @@ describe('UsersService — USR-002 RBAC roles', () => {
             email: 'silva@clinic.com',
             password: 'senha123',
             role: user_role_enum_1.UserRole.DENTISTA,
-        });
-        expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({ role: user_role_enum_1.UserRole.DENTISTA }));
+        }, 't1');
+        expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({ role: user_role_enum_1.UserRole.DENTISTA, tenantId: 't1' }));
         expect(result).toMatchObject({ role: user_role_enum_1.UserRole.DENTISTA });
     });
     it('creates a RECEPCIONISTA user successfully', async () => {
@@ -38,25 +38,25 @@ describe('UsersService — USR-002 RBAC roles', () => {
             email: 'ana@clinic.com',
             password: 'senha123',
             role: user_role_enum_1.UserRole.RECEPCIONISTA,
-        });
+        }, 't1');
         expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({ role: user_role_enum_1.UserRole.RECEPCIONISTA }));
     });
     it('still creates MASTER and ADMIN users', async () => {
         mockRepo.findByEmail.mockResolvedValue(null);
         mockRepo.create.mockResolvedValue({ id: '3', role: user_role_enum_1.UserRole.MASTER });
         const svc = makeService();
-        await svc.create({ name: 'M', email: 'm@c.com', password: 'senha123', role: user_role_enum_1.UserRole.MASTER });
+        await svc.create({ name: 'M', email: 'm@c.com', password: 'senha123', role: user_role_enum_1.UserRole.MASTER }, 't1');
         expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({ role: user_role_enum_1.UserRole.MASTER }));
     });
     it('throws ConflictException for duplicate email regardless of role', async () => {
         mockRepo.findByEmail.mockResolvedValue({ id: 'existing' });
         const svc = makeService();
-        await expect(svc.create({ name: 'X', email: 'dup@c.com', password: 'senha123', role: user_role_enum_1.UserRole.DENTISTA })).rejects.toThrow(common_1.ConflictException);
+        await expect(svc.create({ name: 'X', email: 'dup@c.com', password: 'senha123', role: user_role_enum_1.UserRole.DENTISTA }, 't1')).rejects.toThrow(common_1.ConflictException);
     });
     it('throws BadRequestException for short password', async () => {
         mockRepo.findByEmail.mockResolvedValue(null);
         const svc = makeService();
-        await expect(svc.create({ name: 'X', email: 'x@c.com', password: '123', role: user_role_enum_1.UserRole.DENTISTA })).rejects.toThrow(common_1.BadRequestException);
+        await expect(svc.create({ name: 'X', email: 'x@c.com', password: '123', role: user_role_enum_1.UserRole.DENTISTA }, 't1')).rejects.toThrow(common_1.BadRequestException);
     });
 });
 //# sourceMappingURL=users.service.spec.js.map
