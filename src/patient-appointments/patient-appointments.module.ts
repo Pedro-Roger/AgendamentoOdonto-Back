@@ -24,5 +24,6 @@ import { TenantsModule } from '../tenants/tenants.module';
     { provide: FORM_SETTINGS_REPOSITORY, useClass: FormSettingsRepository },
     { provide: APPOINTMENTS_REPOSITORY, useClass: AppointmentsRepository },
   ],
+  exports: [PatientAppointmentsService],
 })
 export class PatientAppointmentsModule {}
