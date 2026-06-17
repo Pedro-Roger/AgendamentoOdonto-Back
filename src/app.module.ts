@@ -14,6 +14,9 @@ import { TenantsModule } from './tenants/tenants.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { WhatsAppModule } from './whatsapp/whatsapp.module';
 import { DiscordModule } from './common/discord/discord.module';
+import { ApiKeysModule } from './api-keys/api-keys.module';
+import { IntegrationsModule } from './integrations/integrations.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -34,6 +37,9 @@ import { DiscordModule } from './common/discord/discord.module';
     NotificationsModule,
     WhatsAppModule,
     DiscordModule,
+    ApiKeysModule,
+    IntegrationsModule,
+    DashboardModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },
