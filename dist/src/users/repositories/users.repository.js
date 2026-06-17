@@ -29,8 +29,8 @@ let UsersRepository = class UsersRepository {
     findByEmail(email) {
         return this.prisma.user.findUnique({ where: { email } });
     }
-    findById(id) {
-        return this.prisma.user.findUnique({ where: { id } });
+    findById(id, tenantId) {
+        return this.prisma.user.findFirst({ where: { id, tenantId } });
     }
     countAll() {
         return this.prisma.user.count();
@@ -38,15 +38,21 @@ let UsersRepository = class UsersRepository {
     create(data) {
         return this.prisma.user.create({ data });
     }
-    update(id, data) {
-        return this.prisma.user.update({
-            where: { id },
+    async update(id, data, tenantId) {
+        const { count } = await this.prisma.user.updateMany({
+            where: { id, tenantId },
             data,
+        });
+        if (count === 0)
+            throw new common_1.NotFoundException('Usuário não encontrado');
+        return this.prisma.user.findFirst({
+            where: { id, tenantId },
             select: SAFE_SELECT,
         });
     }
-    listSafe() {
+    listSafe(tenantId) {
         return this.prisma.user.findMany({
+            where: { tenantId },
             orderBy: { createdAt: 'desc' },
             select: SAFE_SELECT,
         });

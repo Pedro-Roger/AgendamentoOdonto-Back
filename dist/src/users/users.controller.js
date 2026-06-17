@@ -20,6 +20,7 @@ const roles_decorator_1 = require("../common/auth/roles.decorator");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
 const users_service_1 = require("./users.service");
+const current_user_decorator_1 = require("../common/auth/current-user.decorator");
 let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -27,11 +28,11 @@ let UsersController = class UsersController {
     create(body, req) {
         return this.usersService.create(body, req.user?.tenantId);
     }
-    list() {
-        return this.usersService.list();
+    list(user) {
+        return this.usersService.list(user.tenantId);
     }
-    update(id, body, req) {
-        return this.usersService.update(id, body, req.user?.sub);
+    update(id, body, req, user) {
+        return this.usersService.update(id, body, req.user?.sub, user.tenantId);
     }
 };
 exports.UsersController = UsersController;
@@ -45,8 +46,9 @@ __decorate([
 ], UsersController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "list", null);
 __decorate([
@@ -54,8 +56,9 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Req)()),
+    __param(3, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto, Object]),
+    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto, Object, Object]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "update", null);
 exports.UsersController = UsersController = __decorate([

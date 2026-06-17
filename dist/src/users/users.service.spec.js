@@ -59,4 +59,27 @@ describe('UsersService — USR-002 RBAC roles', () => {
         await expect(svc.create({ name: 'X', email: 'x@c.com', password: '123', role: user_role_enum_1.UserRole.DENTISTA }, 't1')).rejects.toThrow(common_1.BadRequestException);
     });
 });
+describe('UsersService — tenant isolation', () => {
+    beforeEach(() => jest.clearAllMocks());
+    it('list calls listSafe scoped to the tenantId', async () => {
+        mockRepo.listSafe.mockResolvedValue([]);
+        const svc = makeService();
+        await svc.list('t1');
+        expect(mockRepo.listSafe).toHaveBeenCalledWith('t1');
+    });
+    it('update on a target in another tenant returns NotFound', async () => {
+        mockRepo.findById.mockResolvedValue(null);
+        const svc = makeService();
+        await expect(svc.update('u9', { name: 'New' }, 'me', 't1')).rejects.toThrow(common_1.NotFoundException);
+        expect(mockRepo.findById).toHaveBeenCalledWith('u9', 't1');
+    });
+    it('update threads tenantId into findById and repo.update', async () => {
+        mockRepo.findById.mockResolvedValue({ id: 'u1', email: 'u1@c.com', role: user_role_enum_1.UserRole.DENTISTA });
+        mockRepo.update.mockResolvedValue({ id: 'u1' });
+        const svc = makeService();
+        await svc.update('u1', { name: 'Novo Nome' }, 'me', 't1');
+        expect(mockRepo.findById).toHaveBeenCalledWith('u1', 't1');
+        expect(mockRepo.update).toHaveBeenCalledWith('u1', { name: 'Novo Nome' }, 't1');
+    });
+});
 //# sourceMappingURL=users.service.spec.js.map

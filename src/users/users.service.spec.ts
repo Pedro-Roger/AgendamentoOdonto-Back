@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
+import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UserRole } from '../common/enums/user-role.enum';
 
@@ -71,5 +71,34 @@ describe('UsersService — USR-002 RBAC roles', () => {
     await expect(
       svc.create({ name: 'X', email: 'x@c.com', password: '123', role: UserRole.DENTISTA }, 't1'),
     ).rejects.toThrow(BadRequestException);
+  });
+});
+
+describe('UsersService — tenant isolation', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('list calls listSafe scoped to the tenantId', async () => {
+    mockRepo.listSafe.mockResolvedValue([]);
+    const svc = makeService();
+    await svc.list('t1');
+    expect(mockRepo.listSafe).toHaveBeenCalledWith('t1');
+  });
+
+  it('update on a target in another tenant returns NotFound', async () => {
+    mockRepo.findById.mockResolvedValue(null);
+    const svc = makeService();
+    await expect(
+      svc.update('u9', { name: 'New' }, 'me', 't1'),
+    ).rejects.toThrow(NotFoundException);
+    expect(mockRepo.findById).toHaveBeenCalledWith('u9', 't1');
+  });
+
+  it('update threads tenantId into findById and repo.update', async () => {
+    mockRepo.findById.mockResolvedValue({ id: 'u1', email: 'u1@c.com', role: UserRole.DENTISTA });
+    mockRepo.update.mockResolvedValue({ id: 'u1' });
+    const svc = makeService();
+    await svc.update('u1', { name: 'Novo Nome' }, 'me', 't1');
+    expect(mockRepo.findById).toHaveBeenCalledWith('u1', 't1');
+    expect(mockRepo.update).toHaveBeenCalledWith('u1', { name: 'Novo Nome' }, 't1');
   });
 });

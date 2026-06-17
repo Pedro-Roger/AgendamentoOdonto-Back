@@ -42,8 +42,8 @@ let UsersService = class UsersService {
         const { password: _, ...safe } = user;
         return safe;
     }
-    async update(id, data, currentUserId) {
-        const target = await this.usersRepository.findById(id);
+    async update(id, data, currentUserId, tenantId) {
+        const target = await this.usersRepository.findById(id, tenantId);
         if (!target)
             throw new common_1.NotFoundException('Usuário não encontrado');
         if (target.id === currentUserId && data.isActive === false) {
@@ -74,10 +74,10 @@ let UsersService = class UsersService {
             patch.role = data.role;
         if (typeof data.isActive === 'boolean')
             patch.isActive = data.isActive;
-        return this.usersRepository.update(id, patch);
+        return this.usersRepository.update(id, patch, tenantId);
     }
-    list() {
-        return this.usersRepository.listSafe();
+    list(tenantId) {
+        return this.usersRepository.listSafe(tenantId);
     }
 };
 exports.UsersService = UsersService;

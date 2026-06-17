@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UserRole } from '../../common/enums/user-role.enum';
@@ -23,8 +23,8 @@ export class UsersRepository implements IUsersRepository {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
-  findById(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { id } });
+  findById(id: string, tenantId: string): Promise<User | null> {
+    return this.prisma.user.findFirst({ where: { id, tenantId } });
   }
 
   countAll(): Promise<number> {
@@ -41,19 +41,25 @@ export class UsersRepository implements IUsersRepository {
     return this.prisma.user.create({ data });
   }
 
-  update(
+  async update(
     id: string,
     data: { name?: string; email?: string; password?: string; role?: UserRole; isActive?: boolean },
+    tenantId: string,
   ): Promise<SafeUser> {
-    return this.prisma.user.update({
-      where: { id },
+    const { count } = await this.prisma.user.updateMany({
+      where: { id, tenantId },
       data,
+    });
+    if (count === 0) throw new NotFoundException('Usuário não encontrado');
+    return this.prisma.user.findFirst({
+      where: { id, tenantId },
       select: SAFE_SELECT,
     }) as Promise<SafeUser>;
   }
 
-  listSafe(): Promise<SafeUser[]> {
+  listSafe(tenantId: string): Promise<SafeUser[]> {
     return this.prisma.user.findMany({
+      where: { tenantId },
       orderBy: { createdAt: 'desc' },
       select: SAFE_SELECT,
     }) as Promise<SafeUser[]>;

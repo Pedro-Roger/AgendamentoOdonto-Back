@@ -42,8 +42,8 @@ export class UsersService {
     return safe;
   }
 
-  async update(id: string, data: UpdateUserDto, currentUserId: string) {
-    const target = await this.usersRepository.findById(id);
+  async update(id: string, data: UpdateUserDto, currentUserId: string, tenantId: string) {
+    const target = await this.usersRepository.findById(id, tenantId);
     if (!target) throw new NotFoundException('Usuário não encontrado');
 
     if (target.id === currentUserId && data.isActive === false) {
@@ -79,10 +79,10 @@ export class UsersService {
     if (data.role) patch.role = data.role as UserRole;
     if (typeof data.isActive === 'boolean') patch.isActive = data.isActive;
 
-    return this.usersRepository.update(id, patch);
+    return this.usersRepository.update(id, patch, tenantId);
   }
 
-  list() {
-    return this.usersRepository.listSafe();
+  list(tenantId: string) {
+    return this.usersRepository.listSafe(tenantId);
   }
 }
