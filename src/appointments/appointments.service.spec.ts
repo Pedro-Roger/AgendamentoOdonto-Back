@@ -21,21 +21,21 @@ describe('AppointmentsService — AGD-001 week range', () => {
       { id: 'a2', date: '2026-06-10', time: '14:00' },
     ]);
     const svc = makeService();
-    const result = await svc.findByDateRange('2026-06-09', '2026-06-15');
+    const result = await svc.findByDateRange('2026-06-09', '2026-06-15', 't1');
     expect(result).toHaveLength(2);
-    expect(mockRepo.findByDateRange).toHaveBeenCalledWith('2026-06-09', '2026-06-15');
+    expect(mockRepo.findByDateRange).toHaveBeenCalledWith('2026-06-09', '2026-06-15', 't1');
   });
 
   it('throws when range exceeds 31 days', async () => {
     const svc = makeService();
-    await expect(svc.findByDateRange('2026-06-01', '2026-07-10')).rejects.toThrow(
+    await expect(svc.findByDateRange('2026-06-01', '2026-07-10', 't1')).rejects.toThrow(
       BadRequestException,
     );
   });
 
   it('throws when to is before from', async () => {
     const svc = makeService();
-    await expect(svc.findByDateRange('2026-06-15', '2026-06-10')).rejects.toThrow(
+    await expect(svc.findByDateRange('2026-06-15', '2026-06-10', 't1')).rejects.toThrow(
       BadRequestException,
     );
   });
@@ -43,6 +43,6 @@ describe('AppointmentsService — AGD-001 week range', () => {
   it('allows same-day range', async () => {
     mockRepo.findByDateRange.mockResolvedValue([]);
     const svc = makeService();
-    await expect(svc.findByDateRange('2026-06-10', '2026-06-10')).resolves.toEqual([]);
+    await expect(svc.findByDateRange('2026-06-10', '2026-06-10', 't1')).resolves.toEqual([]);
   });
 });

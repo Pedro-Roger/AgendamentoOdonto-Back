@@ -11,7 +11,7 @@ export class AppointmentsService {
     private readonly appointmentsRepository: IAppointmentsRepository,
   ) {}
 
-  async findByDateRange(from: string, to: string) {
+  async findByDateRange(from: string, to: string, tenantId: string) {
     const fromDate = new Date(from);
     const toDate = new Date(to);
     if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
@@ -25,11 +25,11 @@ export class AppointmentsService {
     if (diffDays > 31) {
       throw new BadRequestException('Intervalo máximo de 31 dias');
     }
-    return this.appointmentsRepository.findByDateRange(from, to);
+    return this.appointmentsRepository.findByDateRange(from, to, tenantId);
   }
 
-  async listByDate(date: string) {
-    const appointments = await this.appointmentsRepository.findByDateWithRelations(date);
+  async listByDate(date: string, tenantId: string) {
+    const appointments = await this.appointmentsRepository.findByDateWithRelations(date, tenantId);
     return appointments.map((a) => ({
       id: a.id,
       date: a.date,

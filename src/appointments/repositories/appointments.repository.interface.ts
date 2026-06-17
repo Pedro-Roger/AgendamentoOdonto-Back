@@ -8,9 +8,9 @@ export type AppointmentWithRelations = Appointment & {
 };
 
 export interface IAppointmentsRepository {
-  findByDateWithRelations(date: string): Promise<AppointmentWithRelations[]>;
-  findByDateRange(from: string, to: string): Promise<AppointmentWithRelations[]>;
-  findByServiceAndDate(serviceId: string, date: string): Promise<Appointment[]>;
-  findByPatient(patientId: string): Promise<Appointment[]>;
+  findByDateWithRelations(date: string, tenantId: string): Promise<AppointmentWithRelations[]>;
+  findByDateRange(from: string, to: string, tenantId: string): Promise<AppointmentWithRelations[]>;
+  findByServiceAndDate(serviceId: string, date: string, tenantId: string): Promise<Appointment[]>;
+  findByPatient(patientId: string, tenantId: string): Promise<Appointment[]>;
   create(data: Prisma.AppointmentCreateInput, tx?: Prisma.TransactionClient): Promise<Appointment>;
 }
