@@ -13,7 +13,7 @@ export interface IMedicalRecordsRepository {
     content: Prisma.InputJsonValue;
   }): Promise<MedicalRecord>;
   findById(id: string): Promise<MedicalRecord | null>;
-  findByPatient(patientId: string): Promise<MedicalRecord[]>;
+  findByPatient(patientId: string, tenantId: string): Promise<MedicalRecord[]>;
   findLatestByPatient(patientId: string): Promise<MedicalRecord | null>;
   createAttachment(data: {
     medicalRecordId: string;

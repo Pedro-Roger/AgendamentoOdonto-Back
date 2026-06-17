@@ -29,20 +29,20 @@ export class PatientsService {
     @Inject(MEDICAL_RECORDS_REPOSITORY) private readonly medicalRecordsRepository: IMedicalRecordsRepository,
   ) {}
 
-  list(q?: string) {
-    return this.patientsRepository.findAll(q);
+  list(tenantId: string, q?: string) {
+    return this.patientsRepository.findAll(tenantId, q);
   }
 
-  async profile(id: string) {
-    const patient = await this.patientsRepository.findById(id);
+  async profile(id: string, tenantId: string) {
+    const patient = await this.patientsRepository.findById(id, tenantId);
     if (!patient) throw new NotFoundException('Paciente não encontrado');
     return patient;
   }
 
-  async timeline(id: string): Promise<TimelineEvent[]> {
+  async timeline(id: string, tenantId: string): Promise<TimelineEvent[]> {
     const [appointments, medicalRecords] = await Promise.all([
-      this.appointmentsRepository.findByPatient(id),
-      this.medicalRecordsRepository.findByPatient(id),
+      this.appointmentsRepository.findByPatient(id, tenantId),
+      this.medicalRecordsRepository.findByPatient(id, tenantId),
     ]);
 
     const appointmentEvents: TimelineEvent[] = appointments.map((a) => ({

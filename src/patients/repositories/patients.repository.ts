@@ -7,19 +7,18 @@ import { IPatientsRepository } from './patients.repository.interface';
 export class PatientsRepository implements IPatientsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(q?: string): Promise<Patient[]> {
-    if (!q) return this.prisma.patient.findMany();
-    return this.prisma.patient.findMany({
-      where: { OR: [{ name: { contains: q } }, { cpf: { contains: q } }] },
-    });
+  findAll(tenantId: string, q?: string): Promise<Patient[]> {
+    const where: Prisma.PatientWhereInput = { tenantId };
+    if (q) where.OR = [{ name: { contains: q } }, { cpf: { contains: q } }];
+    return this.prisma.patient.findMany({ where });
   }
 
-  findById(id: string): Promise<Patient | null> {
-    return this.prisma.patient.findUnique({ where: { id } });
+  findById(id: string, tenantId: string): Promise<Patient | null> {
+    return this.prisma.patient.findFirst({ where: { id, tenantId } });
   }
 
-  findByCpf(cpf: string): Promise<Patient | null> {
-    return this.prisma.patient.findUnique({ where: { cpf } });
+  findByCpfAndTenant(cpf: string, tenantId: string): Promise<Patient | null> {
+    return this.prisma.patient.findUnique({ where: { cpf_tenantId: { cpf, tenantId } } });
   }
 
   create(data: Prisma.PatientCreateInput): Promise<Patient> {

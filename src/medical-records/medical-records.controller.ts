@@ -10,6 +10,8 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { CurrentUser } from '../common/auth/current-user.decorator';
+import { JwtPayload } from '../common/auth/jwt-payload.type';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { Roles } from '../common/auth/roles.decorator';
 import { RolesGuard } from '../common/auth/roles.guard';
@@ -49,8 +51,11 @@ export class MedicalRecordsController {
   }
 
   @Get('patient/:patientId/history')
-  listAllByPatient(@Param('patientId') patientId: string) {
-    return this.medicalRecordsService.listAllByPatient(patientId);
+  listAllByPatient(
+    @CurrentUser() user: JwtPayload,
+    @Param('patientId') patientId: string,
+  ) {
+    return this.medicalRecordsService.listAllByPatient(patientId, user.tenantId);
   }
 
   @Post('patient/:patientId/new')

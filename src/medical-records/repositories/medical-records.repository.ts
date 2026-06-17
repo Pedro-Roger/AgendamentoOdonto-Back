@@ -19,9 +19,9 @@ export class MedicalRecordsRepository implements IMedicalRecordsRepository {
     return this.prisma.medicalRecord.findUnique({ where: { id } });
   }
 
-  findByPatient(patientId: string): Promise<MedicalRecord[]> {
+  findByPatient(patientId: string, tenantId: string): Promise<MedicalRecord[]> {
     return this.prisma.medicalRecord.findMany({
-      where: { patientId },
+      where: { patientId, patient: { tenantId } },
       orderBy: { updatedAt: 'desc' },
     });
   }

@@ -59,8 +59,8 @@ export class MedicalRecordsService {
     return this.medicalRecordsRepository.findLatestByPatient(patientId);
   }
 
-  listAllByPatient(patientId: string) {
-    return this.medicalRecordsRepository.findByPatient(patientId);
+  listAllByPatient(patientId: string, tenantId: string) {
+    return this.medicalRecordsRepository.findByPatient(patientId, tenantId);
   }
 
   async updateById(id: string, content: Record<string, unknown>) {

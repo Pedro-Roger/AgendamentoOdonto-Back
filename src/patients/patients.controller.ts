@@ -1,4 +1,6 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { CurrentUser } from '../common/auth/current-user.decorator';
+import { JwtPayload } from '../common/auth/jwt-payload.type';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { Roles } from '../common/auth/roles.decorator';
 import { RolesGuard } from '../common/auth/roles.guard';
@@ -12,17 +14,17 @@ export class PatientsController {
   constructor(private readonly patientsService: PatientsService) {}
 
   @Get()
-  list(@Query() query: SearchPatientsQueryDto) {
-    return this.patientsService.list(query.q);
+  list(@CurrentUser() user: JwtPayload, @Query() query: SearchPatientsQueryDto) {
+    return this.patientsService.list(user.tenantId, query.q);
   }
 
   @Get(':id/profile')
-  profile(@Param('id') id: string) {
-    return this.patientsService.profile(id);
+  profile(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.patientsService.profile(id, user.tenantId);
   }
 
   @Get(':id/timeline')
-  timeline(@Param('id') id: string) {
-    return this.patientsService.timeline(id);
+  timeline(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.patientsService.timeline(id, user.tenantId);
   }
 }
