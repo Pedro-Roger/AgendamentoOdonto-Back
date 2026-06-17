@@ -6,12 +6,14 @@ import {
   USERS_REPOSITORY,
 } from '../users/repositories/users.repository.interface';
 import { UserRole } from '../common/enums/user-role.enum';
+import { TenantsService } from '../tenants/tenants.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject(USERS_REPOSITORY) private readonly usersRepository: IUsersRepository,
     private readonly jwtService: JwtService,
+    private readonly tenantsService: TenantsService,
   ) {}
 
   async login(email: string, password: string) {
@@ -32,6 +34,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
+      tenantId: user.tenantId,
     });
 
     return {
@@ -47,11 +50,14 @@ export class AuthService {
       throw new BadRequestException('Bootstrap disabled: users already exist');
     }
 
+    const tenant = await this.tenantsService.create({ name: body.name, slug: body.name });
+
     const user = await this.usersRepository.create({
       name: body.name,
       email: body.email,
       password: hashSync(body.password, 10),
       role: UserRole.MASTER,
+      tenantId: tenant.id,
     });
 
     return { id: user.id, email: user.email, role: user.role };

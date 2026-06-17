@@ -36,6 +36,7 @@ export class UsersRepository implements IUsersRepository {
     email: string;
     password: string;
     role: UserRole;
+    tenantId: string;
   }): Promise<User> {
     return this.prisma.user.create({ data });
   }

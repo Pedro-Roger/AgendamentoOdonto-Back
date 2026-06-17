@@ -20,7 +20,7 @@ export class UsersService {
     @Inject(USERS_REPOSITORY) private readonly usersRepository: IUsersRepository,
   ) {}
 
-  async create(data: CreateUserDto) {
+  async create(data: CreateUserDto, tenantId: string) {
     if (!data.name?.trim() || !data.email?.trim() || !data.password) {
       throw new BadRequestException('Nome, email e senha são obrigatórios');
     }
@@ -36,6 +36,7 @@ export class UsersService {
       email: data.email.trim().toLowerCase(),
       password: hashSync(data.password, 10),
       role: (data.role as UserRole) ?? UserRole.ADMIN,
+      tenantId,
     });
     const { password: _, ...safe } = user;
     return safe;

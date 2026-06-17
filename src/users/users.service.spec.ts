@@ -27,9 +27,9 @@ describe('UsersService — USR-002 RBAC roles', () => {
       email: 'silva@clinic.com',
       password: 'senha123',
       role: UserRole.DENTISTA,
-    });
+    }, 't1');
     expect(mockRepo.create).toHaveBeenCalledWith(
-      expect.objectContaining({ role: UserRole.DENTISTA }),
+      expect.objectContaining({ role: UserRole.DENTISTA, tenantId: 't1' }),
     );
     expect(result).toMatchObject({ role: UserRole.DENTISTA });
   });
@@ -43,7 +43,7 @@ describe('UsersService — USR-002 RBAC roles', () => {
       email: 'ana@clinic.com',
       password: 'senha123',
       role: UserRole.RECEPCIONISTA,
-    });
+    }, 't1');
     expect(mockRepo.create).toHaveBeenCalledWith(
       expect.objectContaining({ role: UserRole.RECEPCIONISTA }),
     );
@@ -53,7 +53,7 @@ describe('UsersService — USR-002 RBAC roles', () => {
     mockRepo.findByEmail.mockResolvedValue(null);
     mockRepo.create.mockResolvedValue({ id: '3', role: UserRole.MASTER });
     const svc = makeService();
-    await svc.create({ name: 'M', email: 'm@c.com', password: 'senha123', role: UserRole.MASTER });
+    await svc.create({ name: 'M', email: 'm@c.com', password: 'senha123', role: UserRole.MASTER }, 't1');
     expect(mockRepo.create).toHaveBeenCalledWith(expect.objectContaining({ role: UserRole.MASTER }));
   });
 
@@ -61,7 +61,7 @@ describe('UsersService — USR-002 RBAC roles', () => {
     mockRepo.findByEmail.mockResolvedValue({ id: 'existing' });
     const svc = makeService();
     await expect(
-      svc.create({ name: 'X', email: 'dup@c.com', password: 'senha123', role: UserRole.DENTISTA }),
+      svc.create({ name: 'X', email: 'dup@c.com', password: 'senha123', role: UserRole.DENTISTA }, 't1'),
     ).rejects.toThrow(ConflictException);
   });
 
@@ -69,7 +69,7 @@ describe('UsersService — USR-002 RBAC roles', () => {
     mockRepo.findByEmail.mockResolvedValue(null);
     const svc = makeService();
     await expect(
-      svc.create({ name: 'X', email: 'x@c.com', password: '123', role: UserRole.DENTISTA }),
+      svc.create({ name: 'X', email: 'x@c.com', password: '123', role: UserRole.DENTISTA }, 't1'),
     ).rejects.toThrow(BadRequestException);
   });
 });

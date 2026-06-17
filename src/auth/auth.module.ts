@@ -6,6 +6,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersRepository } from '../users/repositories/users.repository';
 import { USERS_REPOSITORY } from '../users/repositories/users.repository.interface';
+import { TenantsModule } from '../tenants/tenants.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { USERS_REPOSITORY } from '../users/repositories/users.repository.interfa
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: (process.env.JWT_EXPIRES_IN ?? '1d') as StringValue },
     }),
+    TenantsModule,
   ],
   controllers: [AuthController],
   providers: [
