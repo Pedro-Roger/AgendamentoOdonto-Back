@@ -10,6 +10,7 @@ import { MedicalRecordsModule } from './medical-records/medical-records.module';
 import { SignaturesModule } from './signatures.module';
 import { PatientsModule } from './patients/patients.module';
 import { UsersModule } from './users/users.module';
+import { TenantsModule } from './tenants/tenants.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { WhatsAppModule } from './whatsapp/whatsapp.module';
 import { DiscordModule } from './common/discord/discord.module';
@@ -29,6 +30,7 @@ import { DiscordModule } from './common/discord/discord.module';
     SignaturesModule,
     PatientsModule,
     UsersModule,
+    TenantsModule,
     NotificationsModule,
     WhatsAppModule,
     DiscordModule,
