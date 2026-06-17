@@ -1,41 +1,40 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { PatientAppointmentsService } from './patient-appointments.service';
-import { RemindersService } from '../whatsapp/reminders.service';
+import { TenantsService } from '../tenants/tenants.service';
 
-@Controller('api/public')
+@Controller('api/public/:slug')
 export class PatientAppointmentsController {
   constructor(
     private readonly patientAppointmentsService: PatientAppointmentsService,
-    private readonly remindersService: RemindersService,
+    private readonly tenants: TenantsService,
   ) {}
 
-  @Get('available-schedules')
-  getAvailableSchedules(@Query('serviceId') serviceId: string, @Query('date') date: string) {
-    return this.patientAppointmentsService.getAvailableSchedules(serviceId, date);
-  }
-
-  @Post('appointments')
-  createAppointment(
-    @Body()
-    body: CreateAppointmentDto,
-  ) {
-    return this.patientAppointmentsService.createAppointment(body);
-  }
-
   @Get('services')
-  listServices() {
-    return this.patientAppointmentsService.listActiveServices();
+  async listServices(@Param('slug') slug: string) {
+    const tenant = await this.tenants.resolveBySlug(slug);
+    return this.patientAppointmentsService.listActiveServices(tenant.id);
   }
 
   @Get('form-settings')
-  getFormSettings() {
-    return this.patientAppointmentsService.getFormSettings();
+  async getFormSettings(@Param('slug') slug: string) {
+    const tenant = await this.tenants.resolveBySlug(slug);
+    return this.patientAppointmentsService.getFormSettings(tenant.id);
   }
 
-  @Post('confirm/:token')
-  async confirmAppointment(@Param('token') token: string) {
-    const confirmed = await this.remindersService.confirmAppointment(token);
-    return { confirmed };
+  @Get('available-schedules')
+  async getAvailableSchedules(
+    @Param('slug') slug: string,
+    @Query('serviceId') serviceId: string,
+    @Query('date') date: string,
+  ) {
+    const tenant = await this.tenants.resolveBySlug(slug);
+    return this.patientAppointmentsService.getAvailableSchedules(tenant.id, serviceId, date);
+  }
+
+  @Post('appointments')
+  async create(@Param('slug') slug: string, @Body() body: CreateAppointmentDto) {
+    const tenant = await this.tenants.resolveBySlug(slug);
+    return this.patientAppointmentsService.createAppointment(tenant.id, body, 'PUBLIC');
   }
 }

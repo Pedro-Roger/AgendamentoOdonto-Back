@@ -11,10 +11,10 @@ import { FORM_SETTINGS_REPOSITORY } from '../clinic-config/repositories/form-set
 import { AppointmentsRepository } from '../appointments/repositories/appointments.repository';
 import { APPOINTMENTS_REPOSITORY } from '../appointments/repositories/appointments.repository.interface';
 import { NotificationsModule } from '../notifications/notifications.module';
-import { WhatsAppModule } from '../whatsapp/whatsapp.module';
+import { TenantsModule } from '../tenants/tenants.module';
 
 @Module({
-  imports: [NotificationsModule, WhatsAppModule],
+  imports: [NotificationsModule, TenantsModule],
   controllers: [PatientAppointmentsController],
   providers: [
     PatientAppointmentsService,
