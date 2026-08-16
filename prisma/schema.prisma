@@ -11,6 +11,7 @@ enum UserRole {
   ADMIN
   DENTISTA
   RECEPCIONISTA
+  SUPERADMIN
 }
 
 model Service {

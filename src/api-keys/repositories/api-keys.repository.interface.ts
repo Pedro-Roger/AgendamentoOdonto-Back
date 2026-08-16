@@ -11,6 +11,7 @@ export interface CreateApiKeyData {
 export interface IApiKeysRepository {
   create(data: CreateApiKeyData): Promise<any>;
   listByTenant(tenantId: string): Promise<any[]>;
+  /** Inclui o Tenant relacionado — o ApiKeyGuard usa `tenant.isActive` pra rejeitar Compania desativada. */
   findByHash(keyHash: string): Promise<any | null>;
   revoke(id: string, tenantId: string): Promise<any>;
   touch(id: string): Promise<any>;

@@ -12,6 +12,6 @@ import { TENANTS_REPOSITORY } from './repositories/tenants.repository.interface'
     PrismaService,
     { provide: TENANTS_REPOSITORY, useClass: TenantsRepository },
   ],
-  exports: [TenantsService],
+  exports: [TenantsService, TENANTS_REPOSITORY],
 })
 export class TenantsModule {}

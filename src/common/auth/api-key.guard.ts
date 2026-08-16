@@ -12,6 +12,9 @@ export class ApiKeyGuard implements CanActivate {
 
     const record = await this.apiKeys.validate(key);
     if (!record) throw new UnauthorizedException('Invalid API key');
+    if (record.tenant?.isActive === false) {
+      throw new UnauthorizedException('Compania inativa');
+    }
 
     const origin = (req.headers['origin'] || req.headers['referer']) as string | undefined;
     if (record.allowedOrigins?.length && origin) {

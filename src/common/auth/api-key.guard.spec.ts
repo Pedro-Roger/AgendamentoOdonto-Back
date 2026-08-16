@@ -28,7 +28,7 @@ describe('ApiKeyGuard', () => {
   });
 
   it('aceita chave válida e injeta tenantId no request', async () => {
-    mockApiKeys.validate.mockResolvedValue({ tenantId: 't1', allowedOrigins: [] });
+    mockApiKeys.validate.mockResolvedValue({ tenantId: 't1', allowedOrigins: [], tenant: { isActive: true } });
     const c = ctx({ 'x-api-key': 'sk_ok' });
     const ok = await makeGuard().canActivate(c);
     expect(ok).toBe(true);
@@ -36,9 +36,20 @@ describe('ApiKeyGuard', () => {
   });
 
   it('bloqueia Origin fora de allowedOrigins', async () => {
-    mockApiKeys.validate.mockResolvedValue({ tenantId: 't1', allowedOrigins: ['https://herlania.com'] });
+    mockApiKeys.validate.mockResolvedValue({
+      tenantId: 't1',
+      allowedOrigins: ['https://herlania.com'],
+      tenant: { isActive: true },
+    });
     await expect(
       makeGuard().canActivate(ctx({ 'x-api-key': 'sk_ok', origin: 'https://evil.com' })),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('rejeita chave de Compania desativada', async () => {
+    mockApiKeys.validate.mockResolvedValue({ tenantId: 't1', allowedOrigins: [], tenant: { isActive: false } });
+    await expect(
+      makeGuard().canActivate(ctx({ 'x-api-key': 'sk_ok' })),
     ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 });

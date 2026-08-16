@@ -17,6 +17,7 @@ import { DiscordModule } from './common/discord/discord.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     ApiKeysModule,
     IntegrationsModule,
     DashboardModule,
+    AdminModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

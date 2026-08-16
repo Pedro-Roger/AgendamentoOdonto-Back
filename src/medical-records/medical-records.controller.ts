@@ -10,8 +10,8 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { CurrentUser } from '../common/auth/current-user.decorator';
-import { JwtPayload } from '../common/auth/jwt-payload.type';
+import { CurrentTenantUser } from '../common/auth/current-user.decorator';
+import { TenantJwtPayload } from '../common/auth/jwt-payload.type';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { Roles } from '../common/auth/roles.decorator';
 import { RolesGuard } from '../common/auth/roles.guard';
@@ -36,23 +36,23 @@ export class MedicalRecordsController {
   constructor(private readonly medicalRecordsService: MedicalRecordsService) {}
 
   @Post()
-  create(@CurrentUser() user: JwtPayload, @Body() body: CreateMedicalRecordDto) {
+  create(@CurrentTenantUser() user: TenantJwtPayload, @Body() body: CreateMedicalRecordDto) {
     return this.medicalRecordsService.upsertByPatient(body.patientId, body.content, user.tenantId);
   }
 
   @Post(':id/duplicate')
-  duplicate(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  duplicate(@CurrentTenantUser() user: TenantJwtPayload, @Param('id') id: string) {
     return this.medicalRecordsService.duplicate(id, user.tenantId);
   }
 
   @Get(':id')
-  findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  findOne(@CurrentTenantUser() user: TenantJwtPayload, @Param('id') id: string) {
     return this.medicalRecordsService.findOne(id, user.tenantId);
   }
 
   @Get('patient/:patientId/history')
   listAllByPatient(
-    @CurrentUser() user: JwtPayload,
+    @CurrentTenantUser() user: TenantJwtPayload,
     @Param('patientId') patientId: string,
   ) {
     return this.medicalRecordsService.listAllByPatient(patientId, user.tenantId);
@@ -60,7 +60,7 @@ export class MedicalRecordsController {
 
   @Post('patient/:patientId/new')
   createForPatient(
-    @CurrentUser() user: JwtPayload,
+    @CurrentTenantUser() user: TenantJwtPayload,
     @Param('patientId') patientId: string,
     @Body() body: UpdateMedicalRecordDto,
   ) {
@@ -69,7 +69,7 @@ export class MedicalRecordsController {
 
   @Patch(':id')
   updateRecord(
-    @CurrentUser() user: JwtPayload,
+    @CurrentTenantUser() user: TenantJwtPayload,
     @Param('id') id: string,
     @Body() body: UpdateMedicalRecordDto,
   ) {
@@ -77,19 +77,19 @@ export class MedicalRecordsController {
   }
 
   @Get('patient/:patientId')
-  findByPatient(@CurrentUser() user: JwtPayload, @Param('patientId') patientId: string) {
+  findByPatient(@CurrentTenantUser() user: TenantJwtPayload, @Param('patientId') patientId: string) {
     return this.medicalRecordsService.findByPatient(patientId, user.tenantId);
   }
 
   @Get(':id/attachments')
-  listAttachments(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+  listAttachments(@CurrentTenantUser() user: TenantJwtPayload, @Param('id') id: string) {
     return this.medicalRecordsService.listAttachments(id, user.tenantId);
   }
 
   @Post(':id/attachments')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_ATTACHMENT_BYTES } }))
   attach(
-    @CurrentUser() user: JwtPayload,
+    @CurrentTenantUser() user: TenantJwtPayload,
     @Param('id') id: string,
     @UploadedFile() file: Express.Multer.File,
   ) {

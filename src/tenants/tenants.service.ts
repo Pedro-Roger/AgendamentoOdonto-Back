@@ -41,12 +41,42 @@ export class TenantsService {
     return this.repo.create({ name: data.name.trim(), slug });
   }
 
+  /**
+   * Cria a Compania própria de um dentista. Diferente de `create`, não recebe slug do cliente
+   * e não falha em colisão: dois dentistas homônimos viram `dra-herlania` e `dra-herlania-2`.
+   */
+  async createForDentist(name: string) {
+    const trimmed = name?.trim();
+    if (!trimmed) {
+      throw new BadRequestException('Nome é obrigatório');
+    }
+    const base = slugify(trimmed);
+    if (!base) {
+      throw new BadRequestException('Slug inválido');
+    }
+    let slug = base;
+    let suffix = 2;
+    while (await this.repo.findBySlug(slug)) {
+      slug = `${base}-${suffix}`;
+      suffix += 1;
+    }
+    return this.repo.create({ name: trimmed, slug });
+  }
+
+  /**
+   * Usado pelo booking público (`GET/POST /api/public/:slug/...`). Compania desativada é
+   * tratada como inexistente (404) — sem isso, `Tenant.isActive` continuaria sendo cosmético.
+   */
   async resolveBySlug(slug: string) {
     const tenant = await this.repo.findBySlug(slug);
-    if (!tenant) {
+    if (!tenant || tenant.isActive === false) {
       throw new NotFoundException('Compania não encontrada');
     }
     return tenant;
+  }
+
+  findById(id: string) {
+    return this.repo.findById(id);
   }
 
   list() {

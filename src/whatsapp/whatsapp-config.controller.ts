@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
-import { CurrentUser } from '../common/auth/current-user.decorator';
-import { JwtPayload } from '../common/auth/jwt-payload.type';
+import { CurrentTenantUser } from '../common/auth/current-user.decorator';
+import { TenantJwtPayload } from '../common/auth/jwt-payload.type';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { RolesGuard } from '../common/auth/roles.guard';
 import { Roles } from '../common/auth/roles.decorator';
@@ -37,12 +37,12 @@ export class WhatsAppConfigController {
   }
 
   @Get('config')
-  getConfig(@CurrentUser() user: JwtPayload) {
+  getConfig(@CurrentTenantUser() user: TenantJwtPayload) {
     return this.configRepo.findFirst(user.tenantId);
   }
 
   @Post('config')
-  saveConfig(@CurrentUser() user: JwtPayload, @Body() body: SaveWhatsAppConfigDto) {
+  saveConfig(@CurrentTenantUser() user: TenantJwtPayload, @Body() body: SaveWhatsAppConfigDto) {
     return this.configRepo.upsert(
       {
         instanceId: '',

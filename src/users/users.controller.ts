@@ -1,12 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { RolesGuard } from '../common/auth/roles.guard';
 import { Roles } from '../common/auth/roles.decorator';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
-import { CurrentUser } from '../common/auth/current-user.decorator';
-import { JwtPayload } from '../common/auth/jwt-payload.type';
+import { CurrentTenantUser } from '../common/auth/current-user.decorator';
+import { TenantJwtPayload } from '../common/auth/jwt-payload.type';
 
 @Controller('api/users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -15,12 +15,12 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() body: CreateUserDto, @Req() req: any) {
-    return this.usersService.create(body, req.user?.tenantId);
+  create(@Body() body: CreateUserDto, @CurrentTenantUser() user: TenantJwtPayload) {
+    return this.usersService.create(body, user.tenantId);
   }
 
   @Get()
-  list(@CurrentUser() user: JwtPayload) {
+  list(@CurrentTenantUser() user: TenantJwtPayload) {
     return this.usersService.list(user.tenantId);
   }
 
@@ -28,9 +28,8 @@ export class UsersController {
   update(
     @Param('id') id: string,
     @Body() body: UpdateUserDto,
-    @Req() req: any,
-    @CurrentUser() user: JwtPayload,
+    @CurrentTenantUser() user: TenantJwtPayload,
   ) {
-    return this.usersService.update(id, body, req.user?.sub, user.tenantId);
+    return this.usersService.update(id, body, user.sub, user.tenantId);
   }
 }

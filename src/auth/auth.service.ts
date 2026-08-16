@@ -30,6 +30,14 @@ export class AuthService {
       throw new BadRequestException('Conta desativada. Contate o administrador.');
     }
 
+    // SUPERADMIN não tem Compania (tenantId null) — pula a checagem, não há Tenant para olhar.
+    if (user.tenantId) {
+      const tenant = await this.tenantsService.findById(user.tenantId);
+      if (!tenant || tenant.isActive === false) {
+        throw new BadRequestException('Compania desativada. Contate o administrador.');
+      }
+    }
+
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
       email: user.email,

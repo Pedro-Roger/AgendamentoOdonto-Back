@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
-import { CurrentUser } from '../common/auth/current-user.decorator';
-import { JwtPayload } from '../common/auth/jwt-payload.type';
+import { CurrentTenantUser } from '../common/auth/current-user.decorator';
+import { TenantJwtPayload } from '../common/auth/jwt-payload.type';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
 import { RolesGuard } from '../common/auth/roles.guard';
 import { Roles } from '../common/auth/roles.decorator';
@@ -17,20 +17,20 @@ export class ClinicConfigController {
 
   @Post('services')
   @Roles('MASTER', 'ADMIN')
-  createService(@CurrentUser() user: JwtPayload, @Body() body: CreateServiceDto) {
+  createService(@CurrentTenantUser() user: TenantJwtPayload, @Body() body: CreateServiceDto) {
     return this.clinicConfigService.createService(body, user.tenantId);
   }
 
   @Get('services')
   @Roles('MASTER', 'ADMIN', 'DENTISTA', 'RECEPCIONISTA')
-  listServices(@CurrentUser() user: JwtPayload) {
+  listServices(@CurrentTenantUser() user: TenantJwtPayload) {
     return this.clinicConfigService.listActiveServices(user.tenantId);
   }
 
   @Put('services/:id')
   @Roles('MASTER', 'ADMIN')
   updateService(
-    @CurrentUser() user: JwtPayload,
+    @CurrentTenantUser() user: TenantJwtPayload,
     @Param('id') id: string,
     @Body() body: UpdateServiceDto,
   ) {
@@ -39,31 +39,31 @@ export class ClinicConfigController {
 
   @Post('schedules')
   @Roles('MASTER', 'ADMIN')
-  createSchedule(@CurrentUser() user: JwtPayload, @Body() body: CreateScheduleDto) {
+  createSchedule(@CurrentTenantUser() user: TenantJwtPayload, @Body() body: CreateScheduleDto) {
     return this.clinicConfigService.createSchedule(body, user.tenantId);
   }
 
   @Get('schedules')
   @Roles('MASTER', 'ADMIN', 'DENTISTA', 'RECEPCIONISTA')
-  listSchedules(@CurrentUser() user: JwtPayload) {
+  listSchedules(@CurrentTenantUser() user: TenantJwtPayload) {
     return this.clinicConfigService.listSchedules(user.tenantId);
   }
 
   @Post('form-settings')
   @Roles('MASTER', 'ADMIN')
-  createFormSettings(@CurrentUser() user: JwtPayload, @Body() body: CreateFormSettingsDto) {
+  createFormSettings(@CurrentTenantUser() user: TenantJwtPayload, @Body() body: CreateFormSettingsDto) {
     return this.clinicConfigService.createFormSettings(body.fields, user.tenantId);
   }
 
   @Get('form-settings')
   @Roles('MASTER', 'ADMIN', 'DENTISTA')
-  getFormSettings(@CurrentUser() user: JwtPayload) {
+  getFormSettings(@CurrentTenantUser() user: TenantJwtPayload) {
     return this.clinicConfigService.getFormSettings(user.tenantId);
   }
 
   @Put('schedules')
   @Roles('MASTER', 'ADMIN')
-  replaceSchedules(@CurrentUser() user: JwtPayload, @Body() body: CreateScheduleDto[]) {
+  replaceSchedules(@CurrentTenantUser() user: TenantJwtPayload, @Body() body: CreateScheduleDto[]) {
     return this.clinicConfigService.replaceSchedules(body, user.tenantId);
   }
 }

@@ -31,7 +31,8 @@ export class ApiKeysRepository implements IApiKeysRepository {
   }
 
   findByHash(keyHash: string) {
-    return this.prisma.apiKey.findFirst({ where: { keyHash } });
+    // Inclui o Tenant pra o ApiKeyGuard checar `isActive` sem uma segunda query.
+    return this.prisma.apiKey.findFirst({ where: { keyHash }, include: { tenant: true } });
   }
 
   revoke(id: string, tenantId: string) {
