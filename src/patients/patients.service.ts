@@ -39,6 +39,12 @@ export class PatientsService {
     return patient;
   }
 
+  async remove(id: string, tenantId: string) {
+    const patient = await this.patientsRepository.deleteById(id, tenantId);
+    if (!patient) throw new NotFoundException('Paciente não encontrado');
+    return { deleted: true, id: patient.id };
+  }
+
   async timeline(id: string, tenantId: string): Promise<TimelineEvent[]> {
     const [appointments, medicalRecords] = await Promise.all([
       this.appointmentsRepository.findByPatient(id, tenantId),

@@ -7,4 +7,5 @@ export interface IPatientsRepository {
   findById(id: string, tenantId: string): Promise<Patient | null>;
   findByCpfAndTenant(cpf: string, tenantId: string): Promise<Patient | null>;
   create(data: Prisma.PatientCreateInput): Promise<Patient>;
+  deleteById(id: string, tenantId: string): Promise<Patient | null>;
 }

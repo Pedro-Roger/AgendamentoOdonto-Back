@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { CurrentTenantUser } from '../common/auth/current-user.decorator';
 import { TenantJwtPayload } from '../common/auth/jwt-payload.type';
 import { JwtAuthGuard } from '../common/auth/jwt-auth.guard';
@@ -26,5 +26,11 @@ export class PatientsController {
   @Get(':id/timeline')
   timeline(@CurrentTenantUser() user: TenantJwtPayload, @Param('id') id: string) {
     return this.patientsService.timeline(id, user.tenantId);
+  }
+
+  @Delete(':id')
+  @Roles('MASTER', 'ADMIN', 'DENTISTA')
+  remove(@CurrentTenantUser() user: TenantJwtPayload, @Param('id') id: string) {
+    return this.patientsService.remove(id, user.tenantId);
   }
 }
