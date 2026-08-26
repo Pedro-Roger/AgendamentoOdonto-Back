@@ -31,11 +31,13 @@ export class AuthService {
     }
 
     // SUPERADMIN não tem Compania (tenantId null) — pula a checagem, não há Tenant para olhar.
+    let tenantSlug: string | null = null;
     if (user.tenantId) {
       const tenant = await this.tenantsService.findById(user.tenantId);
       if (!tenant || tenant.isActive === false) {
         throw new BadRequestException('Compania desativada. Contate o administrador.');
       }
+      tenantSlug = tenant.slug;
     }
 
     const accessToken = await this.jwtService.signAsync({
@@ -48,7 +50,7 @@ export class AuthService {
     return {
       accessToken,
       tokenType: 'Bearer',
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: { id: user.id, name: user.name, email: user.email, role: user.role, tenantSlug },
     };
   }
 

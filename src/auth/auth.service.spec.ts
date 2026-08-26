@@ -55,10 +55,10 @@ describe('AuthService — Tenant.isActive valendo no login', () => {
 
   it('permite login com Compania ativa', async () => {
     mockUser();
-    mockTenants.findById.mockResolvedValue({ id: 't1', isActive: true });
+    mockTenants.findById.mockResolvedValue({ id: 't1', slug: 'dra-herlania', isActive: true });
     mockJwt.signAsync.mockResolvedValue('tok');
     const result = await makeService().login('a@b.com', 'senha');
-    expect(result).toMatchObject({ accessToken: 'tok' });
+    expect(result).toMatchObject({ accessToken: 'tok', user: { tenantSlug: 'dra-herlania' } });
   });
 
   it('SUPERADMIN (tenantId null) pula a checagem de Compania', async () => {
