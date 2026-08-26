@@ -26,4 +26,12 @@ describe('PatientAppointmentsController — booking por slug', () => {
     await makeController().create('dra-herlania', dto);
     expect(mockService.createAppointment).toHaveBeenCalledWith('t1', dto, 'PUBLIC');
   });
+
+  it('retorna horários disponíveis resolvendo tenant pelo slug', async () => {
+    mockService.getAvailableSchedules.mockResolvedValueOnce([{ id: 's1', startTime: '09:00' }]);
+    const result = await makeController().getAvailableSchedules('dra-herlania', 'svc-1', '2026-06-01');
+    expect(mockTenants.resolveBySlug).toHaveBeenCalledWith('dra-herlania');
+    expect(mockService.getAvailableSchedules).toHaveBeenCalledWith('t1', 'svc-1', '2026-06-01');
+    expect(result).toEqual([{ id: 's1', startTime: '09:00' }]);
+  });
 });
